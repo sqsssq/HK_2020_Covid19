@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-20 19:23:35
- * @LastEditTime: 2022-11-22 20:17:56
+ * @LastEditTime: 2022-11-28 23:22:19
  */
 
 import axios from 'axios';
@@ -28,4 +28,14 @@ export function fetchAllData(param, callback) {
         }, errResponse => {
             console.log(errResponse)
         })
+}
+
+export function saveNetworkData(param, callback) {
+    const url = `${TEST_URL_PREFIX}/saveNetwork/`;
+    axios.post(url, param)
+    .then(response => {
+        callback(response.data);
+    }, errResponse => {
+        console.log(errResponse);
+    })
 }

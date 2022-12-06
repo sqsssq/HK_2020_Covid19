@@ -2,18 +2,14 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-20 23:25:35
- * @LastEditTime: 2022-11-26 16:34:44
+ * @LastEditTime: 2022-11-29 15:03:34
 -->
 <template>
-    <div id="navBar"></div>
-    <div style="height: calc(94vh - 0px); width: calc(100% - 0px);">
+    <!-- <div id="navBar"></div> -->
+    <div style="height: calc(100vh - 0px); width: calc(100% - 0px);">
         <div class="framework" style="position: absolute; left: 5px; top: 10px; height: calc(25% - 15px); width: 75%;">
-            <div class="frameworkTitle">
-                <div class="title">Calendar View</div>
-            </div>
-            <div class="frameworkBody">
+            
                 <Calendar :allData="allData"/>
-            </div>
         </div>
         <div class="framework"
             style="position: absolute; left: calc(5px); top: calc(25% + 10px); height: calc((75% - 30px) / 2); width: calc(25% - 10px);">
@@ -34,12 +30,9 @@
         </div>
         <div class="framework"
             style="position: absolute; left: calc(25% + 15px); top: calc(25% + 10px); height: calc(75% - 15px); width: calc(50% - 10px);">
-            <div class="frameworkTitle">
-                <div class="title">Network View</div>
-            </div>
-            <div class="frameworkBody">
-                <!-- <Network :allData="allData"/> -->
-            </div>
+            
+                <Network :allData="allData"/>
+            
         </div>
         <div>
 
@@ -72,7 +65,7 @@ export default {
     components: { Calendar, Map, Network }
 }
 </script>
-<style scoped>
+<style>
 .framework {
     /* margin: 5px; */
     border: 1px solid black;

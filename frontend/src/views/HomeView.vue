@@ -2,12 +2,12 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-09-17 23:36:36
- * @LastEditTime: 2022-11-26 04:07:18
+ * @LastEditTime: 2022-12-14 18:24:43
 -->
 <template>
   <div class="common-layout" style="width: 100%; height: 100vh;" v-loading="!initSign"
     :element-loading-text="loadingText" element-loading-background="rgba(0, 0, 0, 0.8)">
-    <Main v-if="initSign" :allData="allData" />
+    <Main v-if="initSign" :allData="allData" :migrationData="migrationData" />
   </div>
 </template>
 
@@ -21,7 +21,8 @@ export default {
   data() {
     return {
       msgH: null,
-      allData: undefined
+      allData: undefined,
+      migrationData: undefined
     };
   },
   computed: {
@@ -30,6 +31,7 @@ export default {
       // console.log(dataStore.allData)
       // if (!dataStore.allData) {
         this.allData = dataStore.allData;
+        this.migrationData = dataStore.migrationData;
       // }
       // console.log(this.allData[1]);
       // for (let i in this.allData) {
@@ -38,7 +40,7 @@ export default {
       //   console.log(JSON.parse(this.allData))
       //   break;
       // }
-      return this.allData;
+      return this.allData && this.migrationData;
     },
     loadingText() {
       return "Loading"
@@ -50,6 +52,7 @@ export default {
 
     const dataStore = useDataStore();
     dataStore.fetchAllData();
+    dataStore.fetchMigration();
     // this.msgH = dataStore.msg;
     // console.log(dataStore.allData);
     // csv('')

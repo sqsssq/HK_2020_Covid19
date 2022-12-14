@@ -2,7 +2,7 @@
 Description: 
 Author: Qing Shi
 Date: 2022-11-20 19:14:42
-LastEditTime: 2022-12-06 13:12:51
+LastEditTime: 2022-12-14 18:11:37
 '''
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
@@ -27,7 +27,15 @@ def hello_resp():
 @app.route('/api/test/fetchAllData/', methods=['POST'])
 def fetchAllData():
     params = request.json
-    data_path = '{}/data/covidData1.json'.format(FILE_ABS_PATH)
+    data_path = '{}/data/dccacovidData1.json'.format(FILE_ABS_PATH)
+    with open(data_path, 'rt', encoding="gbk") as input_file:
+        data = json.load(input_file)
+        return data
+
+@app.route('/api/test/fetchMigration/', methods=['POST'])
+def fetchMigration():
+    params = request.json
+    data_path = '{}/data/migration.json'.format(FILE_ABS_PATH)
     with open(data_path, 'rt', encoding="gbk") as input_file:
         data = json.load(input_file)
         return data

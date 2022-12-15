@@ -2,12 +2,12 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-12-13 02:18:26
- * @LastEditTime: 2022-12-14 16:25:06
+ * @LastEditTime: 2022-12-15 14:56:16
 -->
 <template>
     <!-- <div> -->
     <div class="frameworkTitle">
-        <div class="title">Stream View</div>
+        <div class="title">Case Time Variation</div>
     </div>
     <div class="frameworkBody">
         <div ref="stream" style="width: 100%; height: 100%">
@@ -26,7 +26,6 @@
 </template>
 <script>
 import * as d3 from 'd3';
-import { max } from 'd3';
 export default {
     name: 'APP',
     props: ['allData'],
@@ -149,9 +148,9 @@ export default {
                 }
             }
             // console.log(min_y, max_y);
-            const yScale = d3.scaleLinear([min_y, max_y], [0.9 * this.elHeight, 0]);
+            const yScale = d3.scaleLinear([min_y, max_y], [1 * this.elHeight, 0]);
             const xScale = d3.scaleLinear([0, series[0].length - 1], [0, this.elWidth]);
-            const rScale = d3.scaleLinear([min_v, max_v], [0, 0.9 * this.elHeight]);
+            const rScale = d3.scaleLinear([min_v, max_v], [0, 1 * this.elHeight]);
             // console.log(yScale(0));
             const area = d3.area()
                 .x((d) => xScale(d[0]))
@@ -162,7 +161,7 @@ export default {
             let rectPath = new Array();
             for (let i = 0; i < data.length; ++i) {
                 let namespace = ["low", "mid", "high"];
-                let poscnt = 0.9 * this.elHeight;
+                let poscnt = 1 * this.elHeight;
                 for (const j of namespace) {
                     let h = rScale(data[i][j]);
                     rectPath.push({

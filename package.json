@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "leaflet": "^1.9.3"
+    "leaflet": "^1.9.3",
+    "vue-wordcloud": "^1.1.1",
+    "vuewordcloud": "^18.7.12"
   }
 }

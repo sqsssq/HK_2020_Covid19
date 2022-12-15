@@ -2,43 +2,40 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-20 23:25:35
- * @LastEditTime: 2022-12-14 19:04:25
+ * @LastEditTime: 2022-12-15 16:28:45
 -->
 <template>
     <!-- <div id="navBar"></div> -->
-    <div style="height: calc(100vh - 0px); width: calc(100% - 0px);">
-        <div class="framework"
-            style="position: absolute; left: 5px; top: calc(35vw + 25px); height: calc(100vh - 35vw - 35px); width: calc(100vw - 10px)">
-
-            <!-- <Calendar :allData="allData"/> -->
+    <div style="height: calc(96vh - 0px); width: calc(100% - 0px);">
+        <div class="framework" style="position: absolute; left: calc(50vw + 10px); top: calc(5px); height: calc(15vh - 15px); width: calc(100vw - 50vw - 20px)">
             <Stream :allData="allData"/>
         </div>
-        <div class="framework" style="position: absolute; left: calc(5px); top: 5px; height: 35vw; width: 35vw;">
-                <Map :allData="allData" />
+        <div class="framework" style="position: absolute; left: calc(50vw + 10px); top: calc(5px + 15vh); height: 50vh; width: calc(100vw - 50vw - 20px)">
+            <Map :allData="allData"/>
         </div>
-        <div class="framework"
-            style="position: absolute; left: calc(70vw + 45px); top: calc(5px); height: calc((35vw - 10px) / 2); width: calc(30vw - 50px);">
+        <div class="framework" style="position: absolute; left: calc(50vw + 10px); top: calc(20px + 65vh); height: calc(35vh - 30px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
             <Matrix :allData="allData" :migrationData="migrationData"/>
         </div>
-        <div class="framework" style="position: absolute; left: calc(35vw + 25px); top: 5px; height: 35vw; width: 35vw">
+        <div class="framework" style="position: absolute; left: calc(50vw + 10px + (100vw - 50vw - 20px - 20px) / 2 + 20px); top: calc(20px + 65vh); height: calc(35vh - 30px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
+            <Info :allData="allData"/>
+        </div>
+        <div class="framework" style="position: absolute; left: 5px; top: calc(5px + 15vh - 0px); height: calc(85vh - 15px); width: calc(50vw - 15px)">
             <Network :allData="allData" />
         </div>
-        <div>
-
-        </div>
-        <div>
-
+        <div class="framework" style="position: absolute; left: 5px; top: calc(5px); height: calc(15vh - 15px); width: calc(50vw - 15px)">
+            <Calendar :allData="allData" />
         </div>
     </div>
 </template>
 <script>
-
 // import { useDataStore } from "../stores/counter";
 import Calendar from "./calendar.vue";
+import Info from "./info.vue";
 import Map from "./map.vue"
 import Matrix from "./matrix.vue";
 import Network from "./network.vue";
 import Stream from "./Stream.vue";
+import Wordcloud from "./wordcloud.vue";
 export default {
     name: "APP",
     props: ["allData", "migrationData"],
@@ -53,7 +50,7 @@ export default {
     mounted() {
         // console.log(this.allData);
     },
-    components: { Calendar, Map, Network, Stream, Matrix }
+    components: { Calendar, Map, Network, Stream, Matrix, Wordcloud, Info }
 }
 </script>
 <style>

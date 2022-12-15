@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-09-17 23:36:36
- * @LastEditTime: 2022-12-14 18:24:43
+ * @LastEditTime: 2022-12-15 17:23:16
 -->
 <template>
   <div class="common-layout" style="width: 100%; height: 100vh;" v-loading="!initSign"
@@ -14,7 +14,10 @@
 <script>
 import Main from '../components/Main.vue';
 // import { csv } from 'd3'
+import { json } from 'd3-fetch';
 import { useDataStore } from "../stores/counter";
+import allData from '../assets/dccacovidData1.json';
+import migrationData from '../assets/migration.json';
 
 export default {
   name: "home_view",
@@ -27,19 +30,11 @@ export default {
   },
   computed: {
     initSign() {
-      const dataStore = useDataStore();
-      // console.log(dataStore.allData)
-      // if (!dataStore.allData) {
-        this.allData = dataStore.allData;
-        this.migrationData = dataStore.migrationData;
-      // }
-      // console.log(this.allData[1]);
-      // for (let i in this.allData) {
-      //   console.log(i);
-      //   console.log(typeof this.allData)
-      //   console.log(JSON.parse(this.allData))
-      //   break;
-      // }
+      // const dataStore = useDataStore();
+      // this.allData = dataStore.allData;
+      this.allData = allData;
+      // this.migrationData = dataStore.migrationData;
+      this.migrationData = migrationData;
       return this.allData && this.migrationData;
     },
     loadingText() {
@@ -52,6 +47,10 @@ export default {
 
     const dataStore = useDataStore();
     dataStore.fetchAllData();
+    // console.log(adata);
+    // json('../assets/covidData1.json', c1 => {
+    //   console.log(c1);
+    // })
     dataStore.fetchMigration();
     // this.msgH = dataStore.msg;
     // console.log(dataStore.allData);

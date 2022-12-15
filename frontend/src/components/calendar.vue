@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-23 02:14:57
- * @LastEditTime: 2022-12-06 15:39:11
+ * @LastEditTime: 2022-12-15 14:49:47
 -->
 <template>
     <div class="frameworkTitle">
@@ -13,7 +13,7 @@
             <svg height="100%" width="100%">
                 <g>
                     <rect v-for="(item, index) in dayData" :key="index" :x="item.x * ((elWidth - 40) / 53) + 40"
-                        :y="item.y * 20" rx="3" :width="15" :height="15" stroke="rgb(224, 226, 229)" stroke-width="1"
+                        :y="item.y * 30" rx="3" :width="25" :height="25" stroke="rgb(224, 226, 229)" stroke-width="1"
                         :fill="item.col"></rect>
                     <text x="0" y="32" font-size="18">Mon</text>
                     <text x="0" y="75" font-size="18">Wed</text>
@@ -21,14 +21,14 @@
 
                 </g>
                 <g transform="translate(0, 140)" id="brush_g" ref="brush_g">
-                    <defs>
+                    <!-- <defs>
                         <path id="weekCase" :d="pathData" stroke="none"></path>
                         <linearGradient id="myGradient" gradientTransform="rotate(90)">
                             <stop offset="20%" stop-color="rgb(221, 115, 109)" />
                             <stop offset="90%" stop-color="rgb(234, 193, 166)" />
                         </linearGradient>
                     </defs>
-                    <use x="0" y="0" href="#weekCase" fill="url('#myGradient')" />
+                    <use x="0" y="0" href="#weekCase" fill="url('#myGradient')" /> -->
                 </g>
             </svg>
         </div>

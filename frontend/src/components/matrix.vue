@@ -2,24 +2,27 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-12-14 16:37:02
- * @LastEditTime: 2022-12-14 21:20:15
+ * @LastEditTime: 2022-12-15 14:16:49
 -->
 <template>
     <div class="frameworkTitle">
-        <div class="title">Case Flow</div>
+        <div class="title">Districts Visting Matrix</div>
     </div>
     <div class="frameworkBody">
         <div ref="matrix" style="height: 100%; width: 100%;">
             <svg height="100%" width="100%">
-                <g>
-                    <rect v-for="(t, i) in metrixData" :key="'mr' + i" :x="t.x" :y="t.y" :width="t.w" :height="t.h"
-                        :fill="t.color" :stroke="'white'"></rect>
-                    <rect v-for="(t, i) in crossRect" :key="'mr' + i" :x="t.x" :y="t.y" :width="t.w" :height="t.h"
-                        :fill="'none'" :stroke="'black'" stroke-dasharray="5,5"></rect>
+                <g transform="translate(0, 55)">
+                    <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="0" :transform="translate(i * (elWidth - 145) / 18 + 20, -2, -20)"
+                        :y="0">{{ t }}</text>
+                    <g>
+                        <rect v-for="(t, i) in metrixData" :key="'mr' + i" :x="t.x" :y="t.y" :width="t.w" :height="t.h"
+                            :fill="t.color" :stroke="'white'"></rect>
+                        <rect v-for="(t, i) in crossRect" :key="'mr' + i" :x="t.x" :y="t.y" :width="t.w" :height="t.h"
+                            :fill="'none'" :stroke="'black'" stroke-dasharray="5,5"></rect>
+                    </g>
+                    <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="elWidth - 145 + 5"
+                        :y="20 + i * (elHeight - 55) / (18)">{{ t }}</text>
                 </g>
-                <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="elWidth - 145" :y="20 + i * elHeight / (18)">{{
-                        t
-                }}</text>
             </svg>
         </div>
     </div>
@@ -40,6 +43,9 @@ export default {
         }
     },
     methods: {
+        translate(x, y, r) {
+            return `translate(${x}, ${y}) rotate(${r})`
+        },
         calcMatrix(allData, migrationData) {
             let dicData = {};
             let distinctType = new Set();
@@ -104,7 +110,7 @@ export default {
             let wcnt = 0;
             let hcnt = 0;
             let w = (this.elWidth - 145) / 18;
-            let h = (this.elHeight) / 18;
+            let h = (this.elHeight - 55) / 18;
             let crossRect = [];
             for (let i in matrix) {
                 hcnt = 0;

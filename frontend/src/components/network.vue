@@ -2,11 +2,11 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 12:24:17
- * @LastEditTime: 2022-12-14 16:25:27
+ * @LastEditTime: 2022-12-15 18:15:10
 -->
 <template>
     <div class="frameworkTitle">
-        <div class="title">Network View</div>
+        <div class="title">Case Related Network</div>
         <div class="slider-demo-block" style="width: 300px; float: right; margin-top: 7px; margin-right: 30px;">
             <el-slider v-model="value" range :min="minV" :max="maxV" />
         </div>
@@ -15,12 +15,12 @@
         <div ref="network" style="width: 100%; height: 100%">
             <svg id="net" height="100%" width="100%">
                 <g id="zoom_g">
-                    <path v-for="(t, i) in links" :key="'link' + i"
-                        :d="linkArc(t)" 
-                        fill="none" :opacity="isShow[t.sr] || isShow[t.tr]" stroke="rgb(99, 99, 99)" stroke-width="0.1">
+                    <path v-for="(t, i) in links" :key="'link' + i" :d="linkArc(t)" fill="none"
+                        :opacity="isShow[t.sr] && isShow[t.tr]" stroke="rgb(99, 99, 99)" stroke-width="0.1">
                     </path>
                     <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="t.nr" :fill="t.t_color"
-                        stroke="rgb(99, 99, 99)" stroke-width="0.5" :opacity="isShow[t.id]"></circle>
+                        stroke="rgb(99, 99, 99)" stroke-width="0.5" :opacity="isShow[t.id]"
+                        @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"></circle>
                 </g>
             </svg>
         </div>
@@ -48,6 +48,23 @@ export default {
         }
     },
     methods: {
+        selectNode(sid, rid) {
+            console.log(sid, rid);
+            for (let i in this.isShow) {
+                this.isShow[i] = 0;
+            }
+            this.isShow[sid] = 1;
+            for (let i of rid) {
+                if (parseInt(i) == 0)
+                    break;
+                this.isShow[parseInt(i)] = 1;
+            }
+        },
+        removeSelect() {
+            for (let i in this.isShow) {
+                this.isShow[i] = 1;
+            }
+        },
         transform(x, y, r) {
             return `translate(${x}, ${y}) rotate(${r})`;
         },
@@ -300,10 +317,17 @@ export default {
                 } else {
                     t_color = '#96ceb4';
                 }
+                let t_relate = [];
+                for (let t of relate) {
+                    if (parseInt(t) == parseInt(d['caseno']) || parseInt(t) == 0)
+                        continue;
+                    t_relate.push(parseInt(t));
+                }
                 nodes.push({
                     id: d['caseno'],
                     cnt: 0,
-                    relate: relate.length,
+                    relate: t_relate.length,
+                    rcase: t_relate,
                     t_color: t_color
                 })
                 nodeIndex[parseInt(d['caseno'])] = cnt;
@@ -369,7 +393,6 @@ export default {
                 .force("x", d3.forceX())
                 .force("y", d3.forceY());
 
-
             let xMax = d3.max(nodes, d => d['x']);
             let xMin = d3.min(nodes, d => d['x']);
             let yMax = d3.max(nodes, d => d['y']);
@@ -378,7 +401,7 @@ export default {
             // console.log(nodes[0].relate);
             let xScale = d3.scaleLinear([xMin, xMax], [10, this.networkWidth - 10]);
             let yScale = d3.scaleLinear([yMin, yMax], [10, this.networkHeight - 10]);
-            let rScale = d3.scaleLinear(this.relateNum, [3, 7])
+            let rScale = d3.scaleLinear(this.relateNum, [3, 10])
             for (let i in nodes) {
                 nodes[i].nx = xScale(nodes[i].x);
                 nodes[i].ny = yScale(nodes[i].y);
@@ -410,7 +433,7 @@ export default {
         // [this.nodes, this.links] = this.drawNetwork(netData);
         let netData = this.calcNet(this.allData);
         for (const d of netData.nodes) {
-            this.isShow[d.name] = 1;
+            this.isShow[d.id] = 1;
         }
         let maxV = d3.max(netData.nodes, d => d.relate);
         this.value = [0, maxV];
@@ -431,6 +454,7 @@ export default {
                 }
             }
         },
+        // isShow
         // deep: true
     }
 }

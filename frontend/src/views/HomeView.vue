@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-09-17 23:36:36
- * @LastEditTime: 2022-12-15 17:23:16
+ * @LastEditTime: 2022-12-16 10:06:36
 -->
 <template>
   <div class="common-layout" style="width: 100%; height: 100vh;" v-loading="!initSign"
@@ -16,7 +16,7 @@ import Main from '../components/Main.vue';
 // import { csv } from 'd3'
 import { json } from 'd3-fetch';
 import { useDataStore } from "../stores/counter";
-import allData from '../assets/dccacovidData1.json';
+import allData from '../assets/allcovidData.json';
 import migrationData from '../assets/migration.json';
 
 export default {
@@ -45,13 +45,13 @@ export default {
   },
   mounted() {
 
-    const dataStore = useDataStore();
-    dataStore.fetchAllData();
+    // const dataStore = useDataStore();
+    // dataStore.fetchAllData();
     // console.log(adata);
     // json('../assets/covidData1.json', c1 => {
     //   console.log(c1);
     // })
-    dataStore.fetchMigration();
+    // dataStore.fetchMigration();
     // this.msgH = dataStore.msg;
     // console.log(dataStore.allData);
     // csv('')

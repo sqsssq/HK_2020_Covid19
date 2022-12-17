@@ -2,13 +2,29 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 12:24:17
- * @LastEditTime: 2022-12-15 18:15:10
+ * @LastEditTime: 2022-12-16 22:36:14
 -->
 <template>
     <div class="frameworkTitle">
         <div class="title">Case Related Network</div>
-        <div class="slider-demo-block" style="width: 300px; float: right; margin-top: 7px; margin-right: 30px;">
+        <!-- <div class="slider-demo-block" style="width: 300px; float: right; margin-top: 7px; margin-right: 30px;">
             <el-slider v-model="value" range :min="minV" :max="maxV" />
+        </div> -->
+
+        <div style="float: right; margin-top: 7px; margin-right: 10px; ">
+            <el-button @click="switchClass()" style="width: 150px; font-size: 18px;">{{ classTag == 1 ? 'SES' :
+                    'Deprivation'
+            }}</el-button>
+        </div>
+        <div style="float: right; margin-top: 7px; margin-right: 10px; font-size: 18px;">
+            <svg height="30px" width="300px">
+                <circle cx="15" cy="15" r="10" :fill="class_color[classTag == 1 ? 0 : 2]"></circle>
+                <circle cx="115" cy="15" r="10" :fill="class_color[1]"></circle>
+                <circle cx="215" cy="15" r="10" :fill="class_color[classTag == 1 ? 2 : 0]"></circle>
+                <text x="35" y="21">Low</text>
+                <text x="135" y="21">Mid</text>
+                <text x="235" y="21">High</text>
+            </svg>
         </div>
     </div>
     <div class="frameworkBody">
@@ -16,11 +32,19 @@
             <svg id="net" height="100%" width="100%">
                 <g id="zoom_g">
                     <path v-for="(t, i) in links" :key="'link' + i" :d="linkArc(t)" fill="none"
-                        :opacity="isShow[t.sr] && isShow[t.tr]" stroke="rgb(99, 99, 99)" stroke-width="0.1">
+                        :opacity="isShow[t.sr] && isShow[t.tr]" stroke="rgb(99, 99, 99)" stroke-width="0.5">
                     </path>
-                    <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="t.nr" :fill="t.t_color"
-                        stroke="rgb(99, 99, 99)" stroke-width="0.5" :opacity="isShow[t.id]"
-                        @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"></circle>
+                    <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="t.nr"
+                        :fill="classTag == 1 ? t.t_color : t.d_color" stroke="rgb(99, 99, 99)" stroke-width="0.5"
+                        :opacity="isShow[t.id]" @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"
+                        @click="clickNode(t.id, t.rcase)">
+                    </circle>
+
+                    <g v-show="isClick == 1">
+                        <text v-for="(t, i) in nodes" :key="'tnd' + i" :x="t.nx" :y="t.ny" :opacity="isShow[t.id]" font-size="18">
+                            {{ t.id }}
+                        </text>
+                    </g>
                 </g>
             </svg>
         </div>
@@ -28,6 +52,7 @@
 </template>
 <script>
 import * as d3 from 'd3';
+import { useDataStore } from "../stores/counter";
 export default {
     name: 'APP',
     props: ['allData'],
@@ -39,16 +64,96 @@ export default {
             links: [],
             edges: [],
             value: [0, 10],
+            class_color: ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'],
             maxV: 1,
             minV: 0,
             isShow: {},
+            classTag: 1,
             axisline: [],
+            timeGap: [],
+            isClick: 0,
+            scale_num: 1,
+            selectionNode: [],
+            selectionID: [],
             month: [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
             district: ['unknown', 'Sha Tin', 'Kwai Tsing', 'Wan Chai', 'Tuen Mun', 'Yuen Long', 'Central & Western', 'Southern', 'Yau Tsim Mong', 'Eastern', 'Islands', 'Kowloon City', 'North', 'Tsuen Wan', 'Sham Shui Po', 'Tai Po', 'Kwun Tong', 'Sai Kung', 'Wong Tai Sin']
         }
     },
     methods: {
+        BeLarge() {
+            scale_num++;
+            const zoom = d3.zoom()
+                .extent([[0, 0], [this.networkWidth, this.networkWidth]])
+                .scaleExtent([1, 20])
+                .on("zoom", zoomed);
+
+
+            function zoomed({ transform }) {
+                d3.select("#zoom_g").attr("transform", transform);
+            }
+            // 多少时间内完成缩放
+            d3.select("#net").transition().duration(500).call(
+                // zoom.transform,
+                // // d3.zoomIdentity.translate(100, 100)
+                // d3.zoomIdentity.scaleTo(10)
+                zoom.scaleTo, scale_num
+            );
+        },
+
+        BeLow() {
+            if (scale_num > 1)
+                scale_num--;
+            const zoom = d3.zoom()
+                .extent([[0, 0], [this.networkWidth, this.networkWidth]])
+                .scaleExtent([1, 20])
+                .on("zoom", zoomed);
+            function zoomed({ transform }) {
+                d3.select("#zoom_g").attr("transform", transform);
+            }
+            // 多少时间内完成缩放
+            if (scale_num > 1)
+                d3.select("#net").transition().duration(500).call(
+                    // zoom.transform,
+                    // // d3.zoomIdentity.translate(100, 100)
+                    // d3.zoomIdentity.scaleTo(10)
+                    zoom.scaleTo, scale_num
+                );
+            else
+
+                d3.select("#net").transition().duration(500).call(
+                    zoom.transform,
+                    // // d3.zoomIdentity.translate(100, 100)
+                    d3.zoomIdentity.translate(0, 0).scale(scale_num)
+                );
+        },
+
+        switchClass() {
+            this.classTag = !this.classTag;
+            const dataStore = useDataStore();
+            dataStore.classTag = this.classTag;
+        },
+        clickNode(sid, rid) {
+            // console.log(sid, rid);
+            this.isClick = 1;
+            for (let i in this.isShow) {
+                this.isShow[i] = 0;
+            }
+            let snode = {};
+            this.isShow[sid] = 1;
+            snode[parseInt(sid)] = 1;
+            for (let i of rid) {
+                if (parseInt(i) == 0)
+                    break;
+                snode[parseInt(i)] = 1;
+                this.isShow[parseInt(i)] = 1;
+            }
+            this.selectionNode = snode;
+            const dataStore = useDataStore();
+            // console.log(this.selectionNode);
+            dataStore.selectionNode = this.selectionNode;
+        },
         selectNode(sid, rid) {
+            if (this.isClick == 1) return;
             console.log(sid, rid);
             for (let i in this.isShow) {
                 this.isShow[i] = 0;
@@ -61,9 +166,10 @@ export default {
             }
         },
         removeSelect() {
-            for (let i in this.isShow) {
-                this.isShow[i] = 1;
-            }
+            if (this.isClick != 1)
+                for (let i in this.isShow) {
+                    this.isShow[i] = 1;
+                }
         },
         transform(x, y, r) {
             return `translate(${x}, ${y}) rotate(${r})`;
@@ -297,70 +403,76 @@ export default {
             this.nodes = data.nodes;
             this.edges = data.edges;
         },
-        calcNet(data) {
+        calcNet(data, time_tag, timeGap) {
             let nodes = [];
             let edges = [];
             // let repeatEdges = {};
             let nodeIndex = {};
             let cnt = 0;
+            // let rl_max = 0;
             for (let i in data) {
+                if (time_tag == 1) {
+                    if (data[i]['report_trans_date'] < timeGap[0] || data[i]['report_trans_date'] > timeGap[1]) {
+                        continue;
+                    }
+                }
                 let d = data[i];
                 // let relate = (d['relatedcasesno'].split(','));
                 // if (relate.length == 1)
                 //     continue;
                 let relate = (d['relatedcasesno'].split(','));
                 let t_color = '';
-                if (d['Dcca_type'] == 'High SES Group') {
+                let d_color = '';
+                if (d['Dcca_type'][0] == 'H') {
                     t_color = 'rgba(217,83,79,1)';
-                } else if (d['Dcca_type'] == 'Middle SES Group') {
-                    t_color = '#ffeead';
+                } else if (d['Dcca_type'][0] == 'M') {
+                    t_color = 'rgb(244, 189, 80)';
                 } else {
-                    t_color = '#96ceb4';
+                    t_color = 'rgb(83, 167, 145)';
+                }
+                if (d['Deprivation_type'][0] == 'H') {
+                    d_color = 'rgb(83, 167, 145)';
+                } else if (d['Deprivation_type'][0] == 'M') {
+                    d_color = 'rgb(244, 189, 80)';
+                } else {
+                    d_color = 'rgba(217,83,79,1)';
                 }
                 let t_relate = [];
                 for (let t of relate) {
-                    if (parseInt(t) == parseInt(d['caseno']) || parseInt(t) == 0)
+                    if (parseInt(t) == parseInt(d['caseno']) || parseInt(t) == 0 || parseInt(t) == 8848)
                         continue;
+
+                    if (time_tag == 1) {
+                        // console.log('c' + t.toString())
+                        if (data['c' + (parseInt(t)).toString()]['report_trans_date'] < timeGap[0] || data['c' + (parseInt(t)).toString()]['report_trans_date'] > timeGap[1]) {
+                            continue;
+                        }
+                    }
                     t_relate.push(parseInt(t));
                 }
+                // rl_max = Math.max(rl_max, t_relate.length);
                 nodes.push({
                     id: d['caseno'],
                     cnt: 0,
                     relate: t_relate.length,
                     rcase: t_relate,
-                    t_color: t_color
+                    t_color: t_color,
+                    d_color: d_color
                 })
                 nodeIndex[parseInt(d['caseno'])] = cnt;
                 cnt++;
             }
-            // console.log(nodes);
-            for (let i in data) {
-                // if (i > 20) break;
-                let d = data[i];
-                // nodes.push({
-                //     name: d['caseno']
-                // })
-                let start_id = parseInt(d['caseno']);
-                let relate = (d['relatedcasesno'].split(','));
-                // if (nodeIndex[start_id] == 8392)
-                //     console.log(start_id);
-                if (relate.length == 0) continue;
+            // console.log(rl_max);
+            for (let i in nodes) {
+                let d = nodes[i];
+                let start_id = parseInt(d['id']);
+                let relate = d.rcase;
                 for (const rn of relate) {
+
                     if (parseInt(rn) == 0 || parseInt(rn) == 8848)
                         break;
                     if (parseInt(rn) == start_id)
                         continue;
-                    // let r1 = 's' + (start_id).toString() + 't' + (rn).toString();
-                    // let r2 = 's' + (rn).toString() + 't' + (start_id).toString();
-                    // if (repeatEdges[r1] != 1 && repeatEdges[r2] != 1) {
-                    //     repeatEdges[r1] = 1;
-                    //     repeatEdges[r2] = 1;
-                    // } else {
-                    //     continue;
-                    // }
-                    // console.log(start_id, nodeIndex[start_id], parseInt(rn), nodeIndex[parseInt(rn)]);
-                    // nodes[nodeIndex[start_id]].cnt++;
-                    // nodes[nodeIndex[parseInt(rn)]].cnt++;
                     edges.push({
                         source: start_id,
                         target: parseInt(rn),
@@ -369,6 +481,44 @@ export default {
                     });
                 }
             }
+            // console.log(nodes);
+
+            // for (let i in data) {
+            //     // if (i > 20) break;
+            //     let d = data[i];
+            //     // nodes.push({
+            //     //     name: d['caseno']
+            //     // })
+            //     let start_id = parseInt(d['caseno']);
+            //     let relate = (d['relatedcasesno'].split(','));
+            //     // if (nodeIndex[start_id] == 8392)
+            //     //     console.log(start_id);
+            //     if (relate.length == 0) continue;
+            //     for (const rn of relate) {
+            //         if (parseInt(rn) == 0 || parseInt(rn) == 8848)
+            //             break;
+            //         if (parseInt(rn) == start_id)
+            //             continue;
+            //         // let r1 = 's' + (start_id).toString() + 't' + (rn).toString();
+            //         // let r2 = 's' + (rn).toString() + 't' + (start_id).toString();
+            //         // if (repeatEdges[r1] != 1 && repeatEdges[r2] != 1) {
+            //         //     repeatEdges[r1] = 1;
+            //         //     repeatEdges[r2] = 1;
+            //         // } else {
+            //         //     continue;
+            //         // }
+            //         // console.log(start_id, nodeIndex[start_id], parseInt(rn), nodeIndex[parseInt(rn)]);
+            //         // nodes[nodeIndex[start_id]].cnt++;
+            //         // nodes[nodeIndex[parseInt(rn)]].cnt++;
+            //         edges.push({
+            //             source: start_id,
+            //             target: parseInt(rn),
+            //             sr: start_id,
+            //             tr: parseInt(rn)
+            //         });
+            //     }
+            // }
+
             // console.log(nodes, edges);
             return { nodes: nodes, links: edges };
         },
@@ -401,11 +551,16 @@ export default {
             // console.log(nodes[0].relate);
             let xScale = d3.scaleLinear([xMin, xMax], [10, this.networkWidth - 10]);
             let yScale = d3.scaleLinear([yMin, yMax], [10, this.networkHeight - 10]);
-            let rScale = d3.scaleLinear(this.relateNum, [3, 10])
+            let rScale = d3.scaleLinear(this.relateNum, [6, 15])
             for (let i in nodes) {
                 nodes[i].nx = xScale(nodes[i].x);
                 nodes[i].ny = yScale(nodes[i].y);
                 nodes[i].nr = rScale(nodes[i].relate);
+                if (nodes[i].relate == 0)
+                    nodes[i].nr = 4;
+                // console.log(nodes[i].id);
+                // if (nodes[i].id == 6774)
+                //     nodes[i].nr = 30;
             }
             for (let i in links) {
                 links[i]['source']['nx'] = xScale(links[i]['source']['x']);
@@ -431,16 +586,36 @@ export default {
         // this.value = [0, maxV];
         // this.maxV = maxV;
         // [this.nodes, this.links] = this.drawNetwork(netData);
-        let netData = this.calcNet(this.allData);
+
+        const dataStore = useDataStore();
+        this.timeGap = dataStore.timeGap;
+        let netData = this.calcNet(this.allData, 1, dataStore.timeGap);
         for (const d of netData.nodes) {
             this.isShow[d.id] = 1;
         }
         let maxV = d3.max(netData.nodes, d => d.relate);
         this.value = [0, maxV];
-        this.relateNum = [0, maxV]
+        this.relateNum = [1, maxV]
         this.maxV = maxV;
         // [this.nodes, this.links] = this.drawNetwork(netData);
-        [this.nodes, this.links] = this.drawNet(netData)
+        [this.nodes, this.links] = this.drawNet(netData);
+
+        const vm = this;
+        dataStore.$subscribe((mutation, state) => {
+            if (vm.timeGap != dataStore.timeGap) {
+                vm.timeGap = dataStore.timeGap;
+                let netData = this.calcNet(this.allData, 1, dataStore.timeGap);
+                for (const d of netData.nodes) {
+                    this.isShow[d.id] = 1;
+                }
+                let maxV = d3.max(netData.nodes, d => d.relate);
+                this.value = [0, maxV];
+                this.relateNum = [1, maxV]
+                this.maxV = maxV;
+                // [this.nodes, this.links] = this.drawNetwork(netData);
+                [this.nodes, this.links] = this.drawNet(netData);
+            }
+        })
 
         this.networkZoom();
     },

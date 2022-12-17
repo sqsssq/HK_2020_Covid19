@@ -2,18 +2,26 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-12-14 16:37:02
- * @LastEditTime: 2022-12-15 14:16:49
+ * @LastEditTime: 2022-12-16 17:32:14
 -->
 <template>
     <div class="frameworkTitle">
         <div class="title">Districts Visting Matrix</div>
+        <div style="float: right; margin-top: 7px; margin-right: 10px; font-size: 18px;">
+            <svg height="30px" width="400px">
+                <rect v-for="(t, i) in legendRect" :key="'lr' + i" :x="200 + i * (150 / legendRect.length)" y="10" height="20" :width="(150 / legendRect.length)" :fill="t" :stroke="t"></rect>
+                <text y="25" x="180">0</text>
+                <text y="25" x="355">{{ maxVM }}</text>
+                <text y="25" x="70">{{ 'Visting Case:' }}</text>
+            </svg>
+        </div>
     </div>
     <div class="frameworkBody">
         <div ref="matrix" style="height: 100%; width: 100%;">
             <svg height="100%" width="100%">
                 <g transform="translate(0, 55)">
-                    <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="0" :transform="translate(i * (elWidth - 145) / 18 + 20, -2, -20)"
-                        :y="0">{{ t }}</text>
+                    <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="0"
+                        :transform="translate(i * (elWidth - 145) / 18 + 20, -2, -20)" :y="0">{{ t }}</text>
                     <g>
                         <rect v-for="(t, i) in metrixData" :key="'mr' + i" :x="t.x" :y="t.y" :width="t.w" :height="t.h"
                             :fill="t.color" :stroke="'white'"></rect>
@@ -28,6 +36,7 @@
     </div>
 </template>
 <script>
+import { useDataStore } from "../stores/counter";
 import { scaleLinear } from 'd3-scale';
 export default {
     name: 'APP',
@@ -38,6 +47,9 @@ export default {
             elWidth: 0,
             metrixData: [],
             crossRect: [],
+            timeGap: [],
+            legendRect: [],
+            maxVM: 0,
             color_map: ['rgb(235, 237, 240)', 'rgb(234, 193, 166)', 'rgb(221, 115, 109)', 'rgb(179, 92, 81)', 'rgb(115, 68, 50)'],
             legendText: ['Sha Tin', 'Yau Tsim Mong', 'Central and Western', 'Kowloon City', 'Kwai Tsing', 'Kwun Tong', 'Wan Chai', 'Southern', 'Eastern', 'Sai Kung', 'Sham Shui Po', 'Wong Tai Sin', 'Tuen Mun', 'Yuen Long', 'Tai Po', 'Islands', 'Tsuen Wan', 'North']
         }
@@ -46,15 +58,25 @@ export default {
         translate(x, y, r) {
             return `translate(${x}, ${y}) rotate(${r})`
         },
-        calcMatrix(allData, migrationData) {
+        parseDateToDay(time) {
+            let month = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let sumMonth = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
+            let monthName = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+
+            let t = time.split('/');
+            let m = parseInt(t[1]);
+            let d = parseInt(t[0]);
+            return sumMonth[m - 1] + d;
+        },
+        calcMatrix(allData, migrationData, timeGap) {
             let dicData = {};
             let distinctType = new Set();
 
             for (const d in allData) {
                 let type_tag = '';
-                if (allData[d]['Dcca_type'] == 'High SES Group') {
+                if (allData[d]['Dcca_type'][0] == 'H') {
                     type_tag = 'high';
-                } else if (allData[d]['Dcca_type'] == 'Middle SES Group') {
+                } else if (allData[d]['Dcca_type'] == 'M') {
                     type_tag = 'mid';
                 } else {
                     type_tag = 'low'
@@ -80,6 +102,9 @@ export default {
             }
             let max_migration = 0;
             for (const d of migrationData) {
+                let dd = this.parseDateToDay(d['onsetdate']);
+                if (dd < timeGap[0] || dd > timeGap[1])
+                    continue;
                 matrix[d['Original_district']][d['Target_district']].cnt++;
                 max_migration = Math.max(max_migration, matrix[d['Original_district']][d['Target_district']].cnt);
                 matrix[d['Original_district']][d['Target_district']][d['type']]++;
@@ -106,6 +131,22 @@ export default {
                     domain: [setValue[parseInt(i * (setValue.length - 1) / 4)], setValue[parseInt((i + 1) * (setValue.length - 1) / 4)]]
                 });
             }
+            this.maxVM = setValue[setValue.length - 1];
+            let stepL = setValue[setValue.length - 1] / 100;
+            let legL = [];
+            let cnt = 0;
+            for (let i = 0; i < 101; ++i) {
+                if (i * stepL <= scaleSet[cnt].domain[1])
+                {
+                    legL.push(scaleSet[cnt].scale(i * stepL));
+                }
+                else {
+                    cnt++;
+                    if (cnt == 5) break;
+                }
+            }
+            // console.log(legL);
+            this.legendRect = legL;
             let metrixData = [];
             let wcnt = 0;
             let hcnt = 0;
@@ -122,6 +163,8 @@ export default {
                             col = sca.scale(tmp.cnt);
                         }
                     }
+                    if (tmp.cnt == 0)
+                        col = this.color_map[0];
                     metrixData.push({
                         nx: wcnt,
                         ny: hcnt,
@@ -159,7 +202,17 @@ export default {
     mounted() {
         this.elHeight = this.$refs.matrix.offsetHeight;
         this.elWidth = this.$refs.matrix.offsetWidth;
-        this.metrixData = this.calcMatrix(this.allData, this.migrationData);
+        const dataStore = useDataStore();
+        this.timeGap = dataStore.timeGap;
+        this.metrixData = this.calcMatrix(this.allData, this.migrationData, dataStore.timeGap);
+        let vm = this;
+        dataStore.$subscribe((mutation, state) => {
+
+            if (dataStore.timeGap != vm.timeGap) {
+                vm.timeGap = dataStore.timeGap;
+                this.metrixData = this.calcMatrix(this.allData, this.migrationData, dataStore.timeGap);
+            }
+        })
     },
 }
 </script>

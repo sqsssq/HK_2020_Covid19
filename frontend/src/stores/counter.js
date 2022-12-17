@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-09-17 23:36:36
- * @LastEditTime: 2022-12-14 18:19:15
+ * @LastEditTime: 2022-12-16 21:36:58
  */
 import { fetchAllData, fetchHello, fetchMigration } from "../service/module/dataService";
 import { ref, computed } from "vue";
@@ -23,31 +23,34 @@ export const useDataStore = defineStore("dataStore", {
     return {
       msg: 'Hello, Vue SQ',
       allData: null,
-      migrationData: null
+      migrationData: null,
+      timeGap: [1, 366],
+      classTag: 1,
+      selectionNode: {}
     }
   },
   actions: {
     fetchHello() {
       const st = new Date();
-      fetchHello({}, resp => {
-        this.msg = resp;
-        console.log("Fetch Hello Time: ", st - new Date());
-      })
+      // fetchHello({}, resp => {
+      //   this.msg = resp;
+      //   console.log("Fetch Hello Time: ", st - new Date());
+      // })
     },
     fetchAllData() {
       const st = new Date();
-      fetchAllData({}, resp => {
-        this.allData = resp;
-        console.log("Fetch All Data Time: ", new Date() - st);
+      // fetchAllData({}, resp => {
+      //   this.allData = resp;
+      //   console.log("Fetch All Data Time: ", new Date() - st);
 
-      })
+      // })
     },
     fetchMigration() {
       const st = new Date();
-      fetchMigration({}, resp => {
-        this.migrationData = resp;
-        console.log("Fetch Migration Data Time: ", new Date() - st);
-      })
+      // fetchMigration({}, resp => {
+      //   this.migrationData = resp;
+      //   console.log("Fetch Migration Data Time: ", new Date() - st);
+      // })
     }
   }
 })

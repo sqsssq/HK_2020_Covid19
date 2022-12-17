@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 05:07:07
- * @LastEditTime: 2022-12-15 18:20:18
+ * @LastEditTime: 2022-12-16 23:20:21
 -->
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
@@ -14,13 +14,14 @@
         </div>
         <svg id="svg" :width="elWidth" :height="elHeight"
             style="z-index: 10000; position: absolute; top: 0px; left: 0px;pointerEvents: none;">
-            
-            <g>
+
+            <!-- <g>
                 <rect v-for="(t, i) in rectData" :key="'r' + i" :x="t.x" :y="t.y" :width="t.rw" :height="t.rw" :fill-opacity="t.cnt * 10" fill="pink" :stroke="t.cnt != 0 ? 'black' : 'none'"></rect>
-            </g>
+            </g> -->
             <g>
-                <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="c.t_color"
-                    fill-opacity="0.8" :r="3" stroke="rgb(99, 99, 99)" stroke-width="0.5">
+                <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
+                    fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 3" stroke="rgb(99, 99, 99)" stroke-width="0.5"
+                    :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
                 </circle>
             </g>
         </svg>
@@ -29,6 +30,7 @@
 <script>
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useDataStore } from "../stores/counter";
 export default {
     name: 'Map',
     props: ['allData'],
@@ -39,7 +41,10 @@ export default {
             case_pos: [],
             elHeight: 0,
             elWidth: 0,
-            rectData: []
+            rectData: [],
+            timeGap: [1, 366],
+            classTag: 1,
+            selectionNode: {}
         }
     },
     methods: {
@@ -65,29 +70,57 @@ export default {
             let c_data = [];
             let c_pos = []
             for (const i in data) {
+                // if (data[i]['report_trans_day'] < timeGap[0] || data[i]['report_trans_day'] > timeGap[1])
+                //     continue;
                 let d = data[i];
                 let _loc = this.map.latLngToContainerPoint(L.latLng(parseFloat(d['GS84_Y']), parseFloat(d['GS84_X'])));
                 let t_color = '';
-                if (d['Dcca_type'] == 'High SES Group') {
-                    t_color = 'rgba(217,83,79,1)'
-                } else if (d['Dcca_type'] == 'Middle SES Group') {
-                    t_color = '#ffeead'
+                let d_color = '';
+                if (d['Dcca_type'][0] == 'H') {
+                    t_color = 'rgba(217,83,79,1)';
+                } else if (d['Dcca_type'][0] == 'M') {
+                    t_color = 'rgb(244, 189, 80)';
                 } else {
-                    t_color = '#96ceb4';
+                    t_color = 'rgb(83, 167, 145)';
+                }
+                if (d['Deprivation_type'][0] == 'H') {
+                    d_color = 'rgb(83, 167, 145)';
+                } else if (d['Deprivation_type'][0] == 'M') {
+                    d_color = 'rgb(244, 189, 80)';
+                } else {
+                    d_color = 'rgba(217,83,79,1)';
                 }
                 c_data.push({
                     x: _loc.x,
                     y: _loc.y,
                     d: d,
+                    id: parseInt(d['caseno']),
                     lat: parseFloat(d['GS84_Y']),
                     lon: parseFloat(d['GS84_X']),
-                    t_color: t_color
+                    t_color: t_color,
+                    d_color: d_color,
+                    reportTime: data[i]['report_trans_date']
                 });
+                // if (i == 'c1')
+                // console.log(data[i], data[i]['report_trans_day'])
                 c_pos.push({
                     lat: parseFloat(d['GS84_Y']),
                     lon: parseFloat(d['GS84_X'])
                 });
             }
+            
+            let _loc = this.map.latLngToContainerPoint(L.latLng(22.262691, 114.131692));
+            c_data.push(
+                {
+                    x: _loc.x,
+                    y: _loc.y,
+                    lat: parseFloat(22.262691),
+                    lon: parseFloat(114.131692),
+                    t_color: 'red',
+                    d_color: 'red',
+                    id: 'bar'
+                }
+            )
             return [c_data, c_pos];
         },
         updateScatter() {
@@ -120,7 +153,7 @@ export default {
             }
             let max_r = 0;
             for (let i in data) {
-                let index = parseInt(data[i]['x'] / rw)* parseInt(this.elHeight / rw) + parseInt(data[i]['y'] / rw) ;
+                let index = parseInt(data[i]['x'] / rw) * parseInt(this.elHeight / rw) + parseInt(data[i]['y'] / rw);
                 // console.log(index)
                 rect[index].cnt++;
                 max_r = Math.max(max_r, rect[index].cnt);
@@ -137,14 +170,34 @@ export default {
         this.elHeight = this.$refs.map.offsetHeight;
         this.elWidth = this.$refs.map.offsetWidth;
         this.creatMap('mapCase');
+
+        const dataStore = useDataStore();
+        this.timeGap = dataStore.timeGap;
         [this.case_data, this.case_pos] = this.calcScatter(this.allData);
-        this.rectData = this.calcArc(this.case_data);
+        for (let i in this.case_data) {
+            this.selectionNode[this.case_data[i].id] = 1;
+            // break;
+        }
+        // this.rectData = this.calcArc(this.case_data);
         this.map.on('zoom', () => {
             this.updateScatter();
         });
         this.map.on('dragend', () => {
             this.updateScatter();
         });
+        let vm = this;
+        dataStore.$subscribe((mutation, state) => {
+            // console.log(mutation, state);
+            // console.log(dataStore.timeGap)
+            if (vm.timeGap != dataStore.timeGap) {
+                vm.timeGap = dataStore.timeGap;
+            }else if (vm.classTag != dataStore.classTag) {
+                vm.classTag = dataStore.classTag;
+            } else {
+                vm.selectionNode = dataStore.selectionNode;
+                console.log(vm.selectionNode);
+            }
+        })
         // console.log(this.case_data);
     },
 }

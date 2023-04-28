@@ -109,18 +109,18 @@ export default {
                 });
             }
             
-            let _loc = this.map.latLngToContainerPoint(L.latLng(22.262691, 114.131692));
-            c_data.push(
-                {
-                    x: _loc.x,
-                    y: _loc.y,
-                    lat: parseFloat(22.262691),
-                    lon: parseFloat(114.131692),
-                    t_color: 'red',
-                    d_color: 'red',
-                    id: 'bar'
-                }
-            )
+            // let _loc = this.map.latLngToContainerPoint(L.latLng(22.262691, 114.131692));
+            // c_data.push(
+            //     {
+            //         x: _loc.x,
+            //         y: _loc.y,
+            //         lat: parseFloat(22.262691),
+            //         lon: parseFloat(114.131692),
+            //         t_color: 'red',
+            //         d_color: 'red',
+            //         id: 'bar'
+            //     }
+            // )
             return [c_data, c_pos];
         },
         updateScatter() {

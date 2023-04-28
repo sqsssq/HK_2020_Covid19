@@ -8,11 +8,12 @@
     <!-- <div id="navBar"></div> -->
     <div style="height: calc(96vh - 0px); width: calc(100% - 0px);">
         <div class="framework"
-            style="position: absolute; left: calc(50vw + 10px); top: calc(5px); height: calc(15vh - 15px); width: calc(100vw - 50vw - 20px)">
+            
+        style="position: absolute; left: 5px; top: calc(5px + 65vh + 15px); height: calc(35vh - 30px); width: calc(50vw - 15px)">
             <Stream :allData="allData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: calc(50vw + 10px); top: calc(5px + 15vh); height: 50vh; width: calc(100vw - 50vw - 20px)">
+            style="position: absolute; left: calc(50vw + 10px); top: calc(5px); height: 65vh; width: calc(100vw - 50vw - 20px)">
             <Map :allData="allData" />
         </div>
         <div class="framework"
@@ -24,13 +25,13 @@
             <Matrix :allData="allData" :migrationData="migrationData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: 5px; top: calc(5px + 15vh - 0px); height: calc(85vh - 15px); width: calc(50vw - 15px)">
+            style="position: absolute; left: 5px; top: calc(5px + 0vh - 0px); height: calc(65vh - 0px); width: calc(50vw - 15px)">
             <Network :allData="allData" />
         </div>
-        <div class="framework"
+        <!-- <div class="framework"
             style="position: absolute; left: 5px; top: calc(5px); height: calc(15vh - 15px); width: calc(50vw - 15px)">
             <Calendar :allData="allData" />
-        </div>
+        </div> -->
     </div>
 </template>
 <script>

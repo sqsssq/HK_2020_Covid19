@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 05:07:07
- * @LastEditTime: 2022-12-16 23:20:21
+ * @LastEditTime: 2023-05-05 11:07:53
 -->
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
@@ -173,12 +173,10 @@ export default {
 
         const dataStore = useDataStore();
         this.timeGap = dataStore.timeGap;
-        [this.case_data, this.case_pos] = this.calcScatter(this.allData);
+        // [this.case_data, this.case_pos] = this.calcScatter(this.allData);
         for (let i in this.case_data) {
             this.selectionNode[this.case_data[i].id] = 1;
-            // break;
         }
-        // this.rectData = this.calcArc(this.case_data);
         this.map.on('zoom', () => {
             this.updateScatter();
         });

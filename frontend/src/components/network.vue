@@ -519,7 +519,7 @@ export default {
             //     }
             // }
 
-            // console.log(nodes, edges);
+            console.log(nodes, edges);
             return { nodes: nodes, links: edges };
         },
         linkArc(d) {
@@ -536,7 +536,7 @@ export default {
                 return Object.create(d);
             });
             const nodes = data.nodes.map(d => Object.create(d));
-            // console.log(nodes, links);
+            console.log(nodes, links);
             const simulation = d3.forceSimulation(nodes)
                 .force("link", d3.forceLink(links).id(d => d.id))
                 .force("charge", d3.forceManyBody().strength(1))

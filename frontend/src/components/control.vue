@@ -91,23 +91,23 @@
                                 
                             </svg> -->
     
-            <div style="height: 10%;">
+            <!-- <div style="height: 10%;">
                 <div>
                     ALL TIME PERIOD
                 </div>
                 <div style="padding-top: 10px; width: 100%;">
                     2020.1.1 ~ 2021.12.31
                 </div>
-            </div>
-            <div style="height: 10%;">
+            </div> -->
+            <!-- <div style="height: 10%;">
                 <div>
                     ALL CASES
                 </div>
                 <div style="padding-top: 10px; width: 100%;">
                     12000
                 </div>
-            </div>
-            <div style="height: 10%;">
+            </div> -->
+            <!-- <div style="height: 10%;">
                 <div style="height: 30px;">
                     SOCIETY LEVEL
                 </div>
@@ -121,7 +121,7 @@
                                 <text x="235" y="21">High</text>
                             </svg>
                 </div>
-            </div>
+            </div> -->
             <div style="height: 10%;">
                 <div>
                     AREA LEVEL
@@ -145,7 +145,7 @@
     
                 </div>
             </div>
-            <hr style="margin-bottom: 10px;">
+            <!-- <hr style="margin-bottom: 10px;"> -->
             <div style="height: 20%;">
                 <div style="height: 30px;">
                     TIME PERIOD
@@ -157,7 +157,7 @@
                 </div>
                 <!-- <hr> -->
             </div>
-            <div style="height: 30%;">
+            <div style="height: 20%;">
                 <div style="height: 30px;">
                     DEGREE CENTRALITY
                 </div>
@@ -178,29 +178,31 @@
 
 <script>
 import outDegree from '../assets/case_stat.csv';
+
 import { axisBottom, axisLeft } from 'd3-axis';
 import { scaleLinear, scaleUtc } from 'd3-scale';
 import { select } from 'd3-selection';
 import { line} from 'd3-shape';
+import { useDataStore } from '../stores/counter';
 export default {
     props: ['allData'],
     data() {
         return {
-            value: '1',
+            value: 1,
             caseValue: 0,
             class_color: ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'],
             degreeData: [],
             options: [{
-                    value: '1',
-                    label: 'Case',
+                    value: 1,
+                    label: 'Case Level',
                 },
                 {
-                    value: '2',
-                    label: 'DCCA',
+                    value: 2,
+                    label: 'DCCA Level',
                 },
                 {
-                    value: '3',
-                    label: 'Distinct',
+                    value: 3,
+                    label: 'Distinct Level',
                 },
             ]
         };
@@ -214,7 +216,14 @@ export default {
         // console.log(this.allData)
         this.calcTimePeriod(this.allData);
         this.degreeData = this.calcDegree(outDegree)
-        console.log(this.degreeData)
+        // console.log(this.degreeData)
+    },
+
+    watch: {
+        value() {
+            const dataStore = useDataStore();
+            dataStore.area_lev = this.value;
+        }
     },
 
     methods: {
@@ -267,10 +276,25 @@ export default {
             // }
         },
         calcDegree(data) {
-            let sData = data.sort((a, b) => {
+            let bData = []
+            let sData = []
+            let oData = [];
+            for (let i in data) {
+                sData.push(data[i]);
+                bData.push(data[i]);
+                oData.push(data[i]);
+            }
+            sData.sort((a, b) => {
                 return parseFloat(b.degree_center) - parseFloat(a.degree_center);
             })
-            // console.log(sData);
+            bData.sort((a, b) => {
+                return parseFloat(b.degree_center) - parseFloat(a.degree_center);
+            })
+            oData.sort((a, b) => {
+                return parseFloat(b.degree_center) - parseFloat(a.degree_center);
+            })
+            
+            console.log(sData, bData, oData);
             
             let height = this.$refs.degreeDiv.offsetHeight;
             let width = this.$refs.degreeDiv.offsetWidth;

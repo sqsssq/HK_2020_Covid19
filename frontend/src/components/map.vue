@@ -12,25 +12,31 @@
     <div class="frameworkBody">
         <div id="mapCase" ref="map" style="height: 100%; width: 100%; margin: 0px 0 0 0px;">
         </div>
-        <svg id="svg" :width="elWidth" :height="elHeight"
-            style="z-index: 10000; position: absolute; top: 0px; left: 0px;pointerEvents: none;">
-
-            <!-- <g>
-                <rect v-for="(t, i) in rectData" :key="'r' + i" :x="t.x" :y="t.y" :width="t.rw" :height="t.rw" :fill-opacity="t.cnt * 10" fill="pink" :stroke="t.cnt != 0 ? 'black' : 'none'"></rect>
-            </g> -->
-            <g>
-                <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
-                    fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 3" stroke="rgb(99, 99, 99)" stroke-width="0.5"
-                    :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
-                </circle>
-            </g>
-        </svg>
+        <svg id="svg" :width="elWidth" :height="elHeight" style="z-index: 10000; position: absolute; top: 0px; left: 0px;pointerEvents: none;">
+            
+                        <!-- <g>
+                            <rect v-for="(t, i) in rectData" :key="'r' + i" :x="t.x" :y="t.y" :width="t.rw" :height="t.rw" :fill-opacity="t.cnt * 10" fill="pink" :stroke="t.cnt != 0 ? 'black' : 'none'"></rect>
+                        </g> -->
+                        <g v-show="area_lev == 1">
+                            <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
+                                fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 3" stroke="rgb(99, 99, 99)" stroke-width="0.5"
+                                :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
+                            </circle>
+                        </g>
+                        <g v-show="area_lev != 1">
+                            <path :d="area_path" :fill="'none'" stroke="black"></path>
+                        </g>
+                    </svg>
     </div>
 </template>
+
 <script>
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useDataStore } from "../stores/counter";
+import { geoPath, geoTransform } from 'd3';
+import districtData from '../assets/HKDistrict18.json';
+import dccaData from '../assets/DCCA_Adjusted.json';
 export default {
     name: 'Map',
     props: ['allData'],
@@ -44,14 +50,16 @@ export default {
             rectData: [],
             timeGap: [1, 366],
             classTag: 1,
-            selectionNode: {}
+            selectionNode: {},
+            area_lev: 1,
+            area_path: ''
         }
     },
     methods: {
         creatMap(mapTag) {
             let map = L.map(mapTag, {
-                center: [22.37, 114.09555],
-                zoom: 12, //缩放比例
+                center: [22.37, 114.12555],
+                zoom: 11, //缩放比例
                 maxZoom: 20,
                 minZoom: 1,
                 zoomControl: false, //+ - 按钮
@@ -64,6 +72,9 @@ export default {
                 // 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
                 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
             ).addTo(map)
+
+            // L.geoJSON(dccaData).addTo(map)
+            // console.log(districtData);
             this.map = (map);
         },
         calcScatter(data) {
@@ -108,7 +119,7 @@ export default {
                     lon: parseFloat(d['GS84_X'])
                 });
             }
-            
+
             // let _loc = this.map.latLngToContainerPoint(L.latLng(22.262691, 114.131692));
             // c_data.push(
             //     {
@@ -162,44 +173,91 @@ export default {
                 rect[i].cnt /= max_r;
             }
             return rect;
+        },
+        calcPath(data) {
+            // console.log(data);
+            // for (let i in data) {
+            //     console.log(data[i]);
+            // }
+
+            let vm = this;
+            let projection = geoTransform({
+                point: function(x, y) {
+                    let _loc = vm.map.latLngToContainerPoint(L.latLng(y, x));
+                    this.stream.point(_loc.x + 10, _loc.y);
+                }
+            });
+            // let _loc = vm.map.latLngToContainerPoint(L.latLng([lonlat[1], lonlat[0]]));
+            // return [_loc.x, _loc.y];
+
+
+            let geoGenerator = geoPath().projection(projection);
+            // console.log(geoGenerator(data));
+            return geoGenerator(data)
         }
     },
-    created() {
-    },
+    created() {},
     mounted() {
         this.elHeight = this.$refs.map.offsetHeight;
         this.elWidth = this.$refs.map.offsetWidth;
         this.creatMap('mapCase');
-
+        let vm = this;
         const dataStore = useDataStore();
         this.timeGap = dataStore.timeGap;
-        // [this.case_data, this.case_pos] = this.calcScatter(this.allData);
+        if (vm.area_lev == 1)
+            [this.case_data, this.case_pos] = this.calcScatter(this.allData);
+        if (vm.area_lev == 2)
+            this.area_path = this.calcPath(dccaData);
+        if (vm.area_lev == 3)
+            this.area_path = this.calcPath(districtData);
+        // this.area_path = this.calcPath(dccaData);
         for (let i in this.case_data) {
             this.selectionNode[this.case_data[i].id] = 1;
         }
-        this.map.on('zoom', () => {
-            this.updateScatter();
+        this.map.on('zoom', (d) => {
+            // console.log(d);
+            if (vm.area_lev == 1)
+                this.updateScatter();
+            if (vm.area_lev == 2)
+                this.area_path = this.calcPath(dccaData);
+            if (vm.area_lev == 3)
+                this.area_path = this.calcPath(districtData);
         });
-        this.map.on('dragend', () => {
-            this.updateScatter();
+        this.map.on('dragend', (d) => {
+            // console.log(vm.area_lev);
+            if (vm.area_lev == 1)
+                this.updateScatter();
+            if (vm.area_lev == 2)
+                this.area_path = this.calcPath(dccaData);
+            if (vm.area_lev == 3)
+                this.area_path = this.calcPath(districtData);
         });
-        let vm = this;
+        // let vm = this;
         dataStore.$subscribe((mutation, state) => {
             // console.log(mutation, state);
             // console.log(dataStore.timeGap)
             if (vm.timeGap != dataStore.timeGap) {
                 vm.timeGap = dataStore.timeGap;
-            }else if (vm.classTag != dataStore.classTag) {
+            } else if (vm.classTag != dataStore.classTag) {
                 vm.classTag = dataStore.classTag;
+            } else if (vm.area_lev != dataStore.area_lev) {
+                vm.area_lev = dataStore.area_lev;
+                if (vm.area_lev == 1)
+                    this.updateScatter();
+                if (vm.area_lev == 2)
+                    this.area_path = this.calcPath(dccaData);
+                if (vm.area_lev == 3)
+                    this.area_path = this.calcPath(districtData);
             } else {
                 vm.selectionNode = dataStore.selectionNode;
-                console.log(vm.selectionNode);
+                // console.log(vm.selectionNode);
             }
         })
         // console.log(this.case_data);
     },
 }
 </script>
+
 <style scoped>
 
 </style>

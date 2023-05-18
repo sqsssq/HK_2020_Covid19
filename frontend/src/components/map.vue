@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 05:07:07
- * @LastEditTime: 2023-05-05 11:07:53
+ * @LastEditTime: 2023-05-18 16:50:09
 -->
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
@@ -75,6 +75,7 @@ export default {
 
             // L.geoJSON(dccaData).addTo(map)
             // console.log(districtData);
+            // console.log(dccaData);
             this.map = (map);
         },
         calcScatter(data) {

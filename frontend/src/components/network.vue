@@ -2,14 +2,14 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 12:24:17
- * @LastEditTime: 2022-12-16 22:36:14
+ * @LastEditTime: 2023-05-10 13:22:27
 -->
 <template>
     <div class="frameworkTitle">
         <div class="title">Case Related Network</div>
         <!-- <div class="slider-demo-block" style="width: 300px; float: right; margin-top: 7px; margin-right: 30px;">
             <el-slider v-model="value" range :min="minV" :max="maxV" />
-        </div> -->
+        </div>
 
         <div style="float: right; margin-top: 7px; margin-right: 10px; ">
             <el-button @click="switchClass()" style="width: 150px; font-size: 18px;">{{ classTag == 1 ? 'SES' :
@@ -25,7 +25,7 @@
                 <text x="135" y="21">Mid</text>
                 <text x="235" y="21">High</text>
             </svg>
-        </div>
+        </div> -->
     </div>
     <div class="frameworkBody">
         <div ref="network" style="width: 100%; height: 100%">
@@ -519,7 +519,7 @@ export default {
             //     }
             // }
 
-            // console.log(nodes, edges);
+            console.log(nodes, edges);
             return { nodes: nodes, links: edges };
         },
         linkArc(d) {
@@ -536,10 +536,10 @@ export default {
                 return Object.create(d);
             });
             const nodes = data.nodes.map(d => Object.create(d));
-            // console.log(nodes, links);
+            console.log(nodes, links);
             const simulation = d3.forceSimulation(nodes)
                 .force("link", d3.forceLink(links).id(d => d.id))
-                .force("charge", d3.forceManyBody().strength(-400))
+                .force("charge", d3.forceManyBody().strength(1))
                 .force("x", d3.forceX())
                 .force("y", d3.forceY());
 
@@ -597,7 +597,7 @@ export default {
         this.value = [0, maxV];
         this.relateNum = [1, maxV]
         this.maxV = maxV;
-        // [this.nodes, this.links] = this.drawNetwork(netData);
+        // // [this.nodes, this.links] = this.drawNetwork(netData);
         [this.nodes, this.links] = this.drawNet(netData);
 
         const vm = this;
@@ -617,7 +617,7 @@ export default {
             }
         })
 
-        this.networkZoom();
+        // this.networkZoom();
     },
     watch: {
         value() {

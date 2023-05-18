@@ -24,9 +24,10 @@ export const useDataStore = defineStore("dataStore", {
       msg: 'Hello, Vue SQ',
       allData: null,
       migrationData: null,
-      timeGap: [1, 366],
+      timeGap: [1, 700],
       classTag: 1,
-      selectionNode: {}
+      selectionNode: {},
+      area_lev: 1
     }
   },
   actions: {

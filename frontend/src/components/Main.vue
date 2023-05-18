@@ -2,40 +2,48 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-20 23:25:35
- * @LastEditTime: 2022-12-16 12:16:54
+ * @LastEditTime: 2023-05-16 12:30:56
 -->
 <template>
     <!-- <div id="navBar"></div> -->
     <div style="height: calc(96vh - 0px); width: calc(100% - 0px);">
         <div class="framework"
-            style="position: absolute; left: calc(50vw + 10px); top: calc(5px); height: calc(15vh - 15px); width: calc(100vw - 50vw - 20px)">
+            
+        style="position: absolute; left: 10px; top: calc(5px + 70vh + 15px - 10px); height: calc(30vh - 20px); width: calc(55vw - 20px)">
             <Stream :allData="allData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: calc(50vw + 10px); top: calc(5px + 15vh); height: 50vh; width: calc(100vw - 50vw - 20px)">
+            style="position: absolute; right: calc(0vw + 10px); top: calc(5px + 5vh); height: calc(66vh - 30px); width: calc(100vw - 55vw - 20px)">
             <Map :allData="allData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: calc(50vw + 10px); top: calc(20px + 65vh); height: calc(35vh - 30px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
+            style="position: absolute; left: calc(55vw + 10px); top: calc(10px + 70vh); height: calc(30vh - 20px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
             <Info :allData="allData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: calc(50vw + 10px + (100vw - 50vw - 20px - 20px) / 2 + 20px); top: calc(20px + 65vh); height: calc(35vh - 30px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
+            style="position: absolute; right: calc(10px); top: calc(10px + 70vh); height: calc(30vh - 20px); width: calc((100vw - 50vw - 20px - 20px) / 2 - 5vw);">
             <Matrix :allData="allData" :migrationData="migrationData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: 5px; top: calc(5px + 15vh - 0px); height: calc(85vh - 15px); width: calc(50vw - 15px)">
+            style="position: absolute; left: calc(60px + 55vw - 66vh); top: calc(5px + 5vh - 0px); height: calc(66vh + 40px - 30px - 40px); width: calc(66vh - 30px - 40px)">
             <Network :allData="allData" />
         </div>
+
         <div class="framework"
+            style="position: absolute; left: calc(10px); top: calc(5px + 5vh - 0px); height: calc(66vh - 30px); width: calc(55vw - 70vh + 30px + 4vh)">
+            <!-- <Network :allData="allData" /> -->
+            <ControlPanel :allData="allData"/>
+        </div>
+        <!-- <div class="framework"
             style="position: absolute; left: 5px; top: calc(5px); height: calc(15vh - 15px); width: calc(50vw - 15px)">
             <Calendar :allData="allData" />
-        </div>
+        </div> -->
     </div>
 </template>
 <script>
 // import { useDataStore } from "../stores/counter";
 import Calendar from "./calendar.vue";
+import ControlPanel from "./control.vue";
 import Info from "./info.vue";
 import Map from "./map.vue"
 import Matrix from "./matrix.vue";
@@ -56,10 +64,11 @@ export default {
     mounted() {
         // console.log(this.allData);
     },
-    components: { Calendar, Map, Network, Stream, Matrix, Wordcloud, Info }
+    components: { Calendar, Map, Network, Stream, Matrix, Wordcloud, Info, ControlPanel }
 }
 </script>
 <style>
+
 .framework {
     /* margin: 5px; */
     border: 1px solid black;

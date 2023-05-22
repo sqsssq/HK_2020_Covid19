@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 05:07:07
- * @LastEditTime: 2023-05-18 16:50:09
+ * @LastEditTime: 2023-05-19 15:28:20
 -->
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
@@ -13,20 +13,22 @@
         <div id="mapCase" ref="map" style="height: 100%; width: 100%; margin: 0px 0 0 0px;">
         </div>
         <svg id="svg" :width="elWidth" :height="elHeight" style="z-index: 10000; position: absolute; top: 0px; left: 0px;pointerEvents: none;">
-            
-                        <!-- <g>
-                            <rect v-for="(t, i) in rectData" :key="'r' + i" :x="t.x" :y="t.y" :width="t.rw" :height="t.rw" :fill-opacity="t.cnt * 10" fill="pink" :stroke="t.cnt != 0 ? 'black' : 'none'"></rect>
-                        </g> -->
-                        <g v-show="area_lev == 1">
-                            <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
-                                fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 3" stroke="rgb(99, 99, 99)" stroke-width="0.5"
-                                :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
-                            </circle>
-                        </g>
-                        <g v-show="area_lev != 1">
-                            <path :d="area_path" :fill="'none'" stroke="black"></path>
-                        </g>
-                    </svg>
+                
+                            <!-- <g>
+                                <rect v-for="(t, i) in rectData" :key="'r' + i" :x="t.x" :y="t.y" :width="t.rw" :height="t.rw" :fill-opacity="t.cnt * 10" fill="pink" :stroke="t.cnt != 0 ? 'black' : 'none'"></rect>
+                            </g> -->
+                            <g v-show="area_lev == 1">
+                                <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
+                                    fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 3" stroke="rgb(99, 99, 99)" stroke-width="0.5"
+                                    :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
+                                </circle>
+                            </g>
+                            <g v-show="area_lev != 1">
+                                <g v-for="(d, i) in area_path" :key="'pa_' + i">
+                                <path  :d="d.d" :fill="d.fill" :stroke="'blue'" stroke-dasharray="5"></path>
+                            </g>
+                            </g>
+                        </svg>
     </div>
 </template>
 
@@ -37,6 +39,8 @@ import { useDataStore } from "../stores/counter";
 import { geoPath, geoTransform } from 'd3';
 import districtData from '../assets/HKDistrict18.json';
 import dccaData from '../assets/DCCA_Adjusted.json';
+import dccaType from '../assets/DCCA_color_type.csv';
+import distinctType from '../assets/District_color_type.csv';
 export default {
     name: 'Map',
     props: ['allData'],
@@ -52,7 +56,7 @@ export default {
             classTag: 1,
             selectionNode: {},
             area_lev: 1,
-            area_path: ''
+            area_path: []
         }
     },
     methods: {
@@ -175,11 +179,22 @@ export default {
             }
             return rect;
         },
-        calcPath(data) {
-            // console.log(data);
+        calcPath(data, data_type) {
+            let select_attr = 'CNAME';
+            if (data_type.length > 18) {
+                select_attr = 'DCCA_CLASS';
+            }
+            // console.log(data_type);
             // for (let i in data) {
             //     console.log(data[i]);
             // }
+            console.log(data_type);
+
+            let type_set = {};
+            for (let i in data_type) {
+                // console.log(Object.keys(distinctType[i]));
+                type_set[data_type[i][Object.keys(data_type[i])[0]]] = parseInt(data_type[i]['Color_type']);
+            }
 
             let vm = this;
             let projection = geoTransform({
@@ -194,7 +209,19 @@ export default {
 
             let geoGenerator = geoPath().projection(projection);
             // console.log(geoGenerator(data));
-            return geoGenerator(data)
+            console.log(type_set);
+            let path_data = new Array();
+            for (let i in data.features) {
+                // console.log(data.features[i].properties[select_attr], type_set[data.features[i].properties[select_attr]], type_set)
+                let d_type = type_set[data.features[i].properties[select_attr]];
+                let class_color = ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'];
+                path_data.push({
+                    d: geoGenerator(data.features[i]),
+                    type:d_type,
+                    fill: class_color[d_type - 1]
+                })
+            }
+            return path_data;
         }
     },
     created() {},
@@ -207,10 +234,10 @@ export default {
         this.timeGap = dataStore.timeGap;
         if (vm.area_lev == 1)
             [this.case_data, this.case_pos] = this.calcScatter(this.allData);
-        if (vm.area_lev == 2)
-            this.area_path = this.calcPath(dccaData);
-        if (vm.area_lev == 3)
-            this.area_path = this.calcPath(districtData);
+                if (vm.area_lev == 2)
+                    this.area_path = this.calcPath(dccaData, dccaType);
+                if (vm.area_lev == 3)
+                    this.area_path = this.calcPath(districtData, distinctType);
         // this.area_path = this.calcPath(dccaData);
         for (let i in this.case_data) {
             this.selectionNode[this.case_data[i].id] = 1;
@@ -219,21 +246,22 @@ export default {
             // console.log(d);
             if (vm.area_lev == 1)
                 this.updateScatter();
-            if (vm.area_lev == 2)
-                this.area_path = this.calcPath(dccaData);
-            if (vm.area_lev == 3)
-                this.area_path = this.calcPath(districtData);
+                if (vm.area_lev == 2)
+                    this.area_path = this.calcPath(dccaData, dccaType);
+                if (vm.area_lev == 3)
+                    this.area_path = this.calcPath(districtData, distinctType);
         });
         this.map.on('dragend', (d) => {
             // console.log(vm.area_lev);
             if (vm.area_lev == 1)
                 this.updateScatter();
-            if (vm.area_lev == 2)
-                this.area_path = this.calcPath(dccaData);
-            if (vm.area_lev == 3)
-                this.area_path = this.calcPath(districtData);
+                if (vm.area_lev == 2)
+                    this.area_path = this.calcPath(dccaData, dccaType);
+                if (vm.area_lev == 3)
+                    this.area_path = this.calcPath(districtData, distinctType);
         });
         // let vm = this;
+        // console.log(distinctType[0][Object.keys(distinctType[0])[0]]);
         dataStore.$subscribe((mutation, state) => {
             // console.log(mutation, state);
             // console.log(dataStore.timeGap)
@@ -246,9 +274,9 @@ export default {
                 if (vm.area_lev == 1)
                     this.updateScatter();
                 if (vm.area_lev == 2)
-                    this.area_path = this.calcPath(dccaData);
+                    this.area_path = this.calcPath(dccaData, dccaType);
                 if (vm.area_lev == 3)
-                    this.area_path = this.calcPath(districtData);
+                    this.area_path = this.calcPath(districtData, distinctType);
             } else {
                 vm.selectionNode = dataStore.selectionNode;
                 // console.log(vm.selectionNode);

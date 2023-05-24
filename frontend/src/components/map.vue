@@ -19,7 +19,7 @@
                             </g> -->
                             <g v-show="area_lev == 1">
                                 <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
-                                    fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 3" stroke="rgb(99, 99, 99)" stroke-width="0.5"
+                                    fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 4" stroke="rgb(99, 99, 99)" stroke-width="0.5"
                                     :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
                                 </circle>
                             </g>
@@ -66,7 +66,8 @@ export default {
                 zoom: 11, //缩放比例
                 maxZoom: 20,
                 minZoom: 1,
-                zoomControl: false, //+ - 按钮
+                zoomControl: true, //+ - 按钮
+                dragging: true,
                 doubleClickZoom: true, //双击放大
                 attributionControl: false, // 右下角leaflet标识
             })
@@ -76,6 +77,12 @@ export default {
                 // 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
                 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
             ).addTo(map)
+
+            //         lat: parseFloat(22.262691),
+            //         lon: parseFloat(114.131692),
+    //         let marker = L.marker([22.262691, 114.131692]).addTo(map)
+    // .bindPopup('<div style="font-size:18px;text-align:center;">All Night Long<br>(bar)</div>')
+    // .openPopup();
 
             // L.geoJSON(dccaData).addTo(map)
             // console.log(districtData);
@@ -92,19 +99,19 @@ export default {
                 let _loc = this.map.latLngToContainerPoint(L.latLng(parseFloat(d['GS84_Y']), parseFloat(d['GS84_X'])));
                 let t_color = '';
                 let d_color = '';
-                if (d['Dcca_type'][0] == 'H') {
-                    t_color = 'rgba(217,83,79,1)';
-                } else if (d['Dcca_type'][0] == 'M') {
+                // if (d['Dcca_type'][0] == 'H') {
+                //     t_color = 'rgba(217,83,79,1)';
+                // } else if (d['Dcca_type'][0] == 'M') {
+                //     t_color = 'rgb(244, 189, 80)';
+                // } else {
+                //     t_color = 'rgb(83, 167, 145)';
+                // }
+                if (d['Deprivation_type'][0] == 'H') {
+                    t_color = 'rgb(83, 167, 145)';
+                } else if (d['Deprivation_type'][0] == 'M') {
                     t_color = 'rgb(244, 189, 80)';
                 } else {
-                    t_color = 'rgb(83, 167, 145)';
-                }
-                if (d['Deprivation_type'][0] == 'H') {
-                    d_color = 'rgb(83, 167, 145)';
-                } else if (d['Deprivation_type'][0] == 'M') {
-                    d_color = 'rgb(244, 189, 80)';
-                } else {
-                    d_color = 'rgba(217,83,79,1)';
+                    t_color = 'rgba(217,83,79,1)';
                 }
                 c_data.push({
                     x: _loc.x,
@@ -214,7 +221,7 @@ export default {
             for (let i in data.features) {
                 // console.log(data.features[i].properties[select_attr], type_set[data.features[i].properties[select_attr]], type_set)
                 let d_type = type_set[data.features[i].properties[select_attr]];
-                let class_color = ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'];
+                let class_color = ['rgba(217,83,79,1)', 'rgb(244, 189, 80)', 'rgb(83, 167, 145)'];
                 path_data.push({
                     d: geoGenerator(data.features[i]),
                     type:d_type,

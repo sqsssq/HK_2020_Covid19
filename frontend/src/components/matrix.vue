@@ -6,7 +6,7 @@
 -->
 <template>
     <div class="frameworkTitle">
-        <div class="title">Statistic View</div>
+        <div class="title">Statistics View</div>
         <!-- <div style="float: right; margin-top: 7px; margin-right: 10px; font-size: 18px;">
             <svg height="30px" width="400px">
                 <rect v-for="(t, i) in legendRect" :key="'lr' + i" :x="200 + i * (150 / legendRect.length)" y="10" height="20" :width="(150 / legendRect.length)" :fill="t" :stroke="t"></rect>
@@ -17,9 +17,15 @@
         </div> -->
     </div>
     <div class="frameworkBody">
-        <div ref="matrix" style="height: 100%; width: 100%;">
+        <div ref="matrix" style="height: 100%; width: 100%; text-align: left; font-size: 18px; margin-left: 10px;">
+            <!-- <div>
+                <div>SELECT TIME PERIOD</div>
+                <div style="margin-top: 10px;">
+                    {{ timeGap1 + '-' + timeGap2 }}
+                </div>
+            </div> -->
             <svg height="100%" width="100%">
-                <g transform="translate(0, 55)">
+                <!-- <g transform="translate(0, 55)">
                     <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="0"
                         :transform="translate(i * (elWidth - 145) / 18 + 20, -2, -20)" :y="0">{{ t }}</text>
                     <g>
@@ -30,12 +36,28 @@
                     </g>
                     <text v-for="(t, i) in legendText" :key="'lgt' + i" :x="elWidth - 145 + 5"
                         :y="20 + i * (elHeight - 55) / (18)">{{ t }}</text>
+                </g> -->
+                <g v-for="(t, i) in caseSet" :key="'alp' + i" :transform="translate(30, 0, 0)">
+                    <path :d="t.d"  stroke="steelblue" fill="none" stroke-width="0.5" :opacity="selectionNode[t.id] == 1 ? 1 : 0"></path>
+                </g>
+                <g v-for="(t, i) in axis" :key="'a' + i" :transform="translate(30 + i * (elWidth - 90) / 3, 0, 0)">
+                    <path :d="'M 0 55 L 0 ' + (elHeight - 10)" stroke="black" fill="none" stroke-width="1"></path>
+                    <text :x="'0'" :y="'0'" :transform="translate(0, 35, 0)" :text-anchor="'middle'">{{ t }}</text>
+                    <g v-for="(d, j) in tag[i]" :key="'t' + j">
+                        <circle cx="0"
+                            :cy="55 + (i != 1 && i != 2 ? ((j + 1) * (elHeight - 65) / (tag[i].length + 1)) : (j * (elHeight - 65) / (tag[i].length - 1)))"
+                            r="3" fill="black"></circle>
+                        <text x="10"
+                            :y="55 + (i != 1 && i != 2 ? ((j + 1) * (elHeight - 65) / (tag[i].length + 1)) : (j * (elHeight - 65) / (tag[i].length - 1)))"
+                            dy="0.3em">{{ d }}</text>
+                    </g>
                 </g>
             </svg>
         </div>
     </div>
 </template>
 <script>
+import { line } from "d3";
 import { useDataStore } from "../stores/counter";
 import { scaleLinear } from 'd3-scale';
 export default {
@@ -48,8 +70,14 @@ export default {
             metrixData: [],
             crossRect: [],
             timeGap: [],
+            timeGap1: '2020/01/01',
+            timeGap2: '2020/12/31',
             legendRect: [],
             maxVM: 0,
+            selectionNode: [],
+            axis: ['Gender', 'Age', 'Related', 'NDI'],
+            tag: [['F', 'M'], ['100', '75', '50', '25', '0'], ['36', '24', '12', '0'], ['High', 'Mid', 'Low']],
+            caseSet: [],
             color_map: ['rgb(235, 237, 240)', 'rgb(234, 193, 166)', 'rgb(221, 115, 109)', 'rgb(179, 92, 81)', 'rgb(115, 68, 50)'],
             legendText: ['Sha Tin', 'Yau Tsim Mong', 'Central and Western', 'Kowloon City', 'Kwai Tsing', 'Kwun Tong', 'Wan Chai', 'Southern', 'Eastern', 'Sai Kung', 'Sham Shui Po', 'Wong Tai Sin', 'Tuen Mun', 'Yuen Long', 'Tai Po', 'Islands', 'Tsuen Wan', 'North']
         }
@@ -57,6 +85,84 @@ export default {
     methods: {
         translate(x, y, r) {
             return `translate(${x}, ${y}) rotate(${r})`
+        },
+
+        calcLink(data, time_tag, timeGap) {
+            const scaleAge = scaleLinear([0, 100], [(this.elHeight - 10), 55]);
+            const scaleRelate = scaleLinear([0, 36], [(this.elHeight - 10), 55]);
+            const scaleGender = {
+                'F': 55 +(this.elHeight - 10 - 55) / 3,
+                'M': 55 +(this.elHeight - 10 - 55) / 3 * 2
+            };
+            const scaleType = {
+                'H': 55 +(this.elHeight - 10 - 55) / 4,
+                'M': 55 +(this.elHeight - 10 - 55) / 4 * 2,
+                'L': 55 +(this.elHeight - 10 - 55) / 4 * 3,
+            }
+            const lenGenerate = line().x(d => d.x).y(d => d.y);
+            let caseSet = new Array();
+            for (let i in data) {
+                if (time_tag == 1) {
+                    if (data[i]['report_trans_date'] < timeGap[0] || data[i]['report_trans_date'] > timeGap[1]) {
+                        continue;
+                    }
+
+                    let d = data[i];
+                    let relate = (d['relatedcasesno'].split(','));
+                    let t_relate = [];
+                    for (let t of relate) {
+                        if (parseInt(t) == parseInt(d['caseno']) || parseInt(t) == 0 || parseInt(t) == 8848)
+                            continue;
+
+                        if (time_tag == 1) {
+                            // console.log('c' + t.toString())
+                            if (data['c' + (parseInt(t)).toString()]['report_trans_date'] < timeGap[0] || data['c' + (parseInt(t)).toString()]['report_trans_date'] > timeGap[1]) {
+                                continue;
+                            }
+                        }
+                        t_relate.push(parseInt(t));
+                    }
+                    let aStep = (this.elWidth - 90) / 3;
+                    let singleCase = [
+                        {
+                            x: aStep * 0,
+                            y: scaleGender[data[i]['gender']]
+                        }, {
+                            x: aStep * 1,
+                            y: scaleAge(data[i]['age'])
+                        }, {
+                            x: aStep * 2,
+                            y: scaleRelate(t_relate.length)
+                        }, 
+                        // {
+                        //     x: aStep * 3,
+                        //     y: scaleType[data[i]['Dcca_type'][0]]
+                        // }, 
+                        {
+                            x: aStep * 3,
+                            y: scaleType[data[i]['Deprivation_type'][0]]
+                        }];
+                    caseSet.push({d: lenGenerate(singleCase), id: parseInt(data[i]['caseno'])});
+                }
+            }
+            return caseSet;
+        },
+        // 第n天的日期
+        parseDayToDate(day) {
+            let month = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let sumMonth = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+            let monthName = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+
+            let y = '2020';
+            let m = '';
+            let d = '';
+            for (let i = 0; i < 12; ++i) {
+                if (day >= sumMonth[i] && day <= sumMonth[i + 1]) {
+                    m = monthName[i];
+                    d = (day - sumMonth[i]);
+                }
+            }
+            return y + '/' + m + '/' + d.toString();
         },
         parseDateToDay(time) {
             let month = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -204,15 +310,31 @@ export default {
         this.elWidth = this.$refs.matrix.offsetWidth;
         const dataStore = useDataStore();
         this.timeGap = dataStore.timeGap;
-        this.metrixData = this.calcMatrix(this.allData, this.migrationData, dataStore.timeGap);
+
+        this.caseSet = this.calcLink(this.allData, 1, this.timeGap);
+        for (let i in this.caseSet) {
+            this.selectionNode[this.caseSet[i].id] = 1;
+        }
+        // console.log(this.selectionNode);
+        // this.metrixData = this.calcMatrix(this.allData, this.migrationData, dataStore.timeGap);
         let vm = this;
         dataStore.$subscribe((mutation, state) => {
 
             if (dataStore.timeGap != vm.timeGap) {
                 vm.timeGap = dataStore.timeGap;
-                this.metrixData = this.calcMatrix(this.allData, this.migrationData, dataStore.timeGap);
+                console.log(vm.timeGap);
+                vm.timeGap1 = vm.parseDayToDate(vm.timeGap[0]);
+                vm.timeGap2 = vm.parseDayToDate(vm.timeGap[1]);
+
+                vm.caseSet = vm.calcLink(vm.allData, 1, vm.timeGap);
+                // this.metrixData = this.calcMatrix(this.allData, this.migrationData, dataStore.timeGap);
+            }else{
+                
+                vm.selectionNode = dataStore.selectionNode;
+                console.log(vm.selectionNode);
             }
-        })
+        
+            })
     },
 }
 </script>

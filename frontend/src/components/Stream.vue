@@ -8,6 +8,9 @@
     <!-- <div> -->
     <div class="frameworkTitle">
         <div class="title">Temporal View</div>
+        <div style="font-size: 18px;padding-top: 10px; float: right; padding-right: 15px;">
+            Selected Time: {{ timeGap1 }} - {{ timeGap2 }}
+        </div>
     </div>
     <div class="frameworkBody">
         <div ref="stream" style="width: 100%; height: 100%">
@@ -25,7 +28,7 @@
 </g>
                     <rect v-for="(t, i) in allPath.rectPath" :key="'rect' + i" :x="t.x" :y="t.y" :height="t.h"
                         :width="t.w" :fill="t.color"></rect>
-
+                <g id="brush_g"></g>
                 </g>
                 <!-- <path :d="'M 40 0 L ' + elWidth + ' 0'" fill="none" stroke="black"
                     :transform="translate(0, 0.95 * elHeight - 14)"></path> -->
@@ -64,12 +67,38 @@ export default {
             timeline: [],
             timeGap1: '2020/1/1',
             timeGap2: '2020/12/31',
-            classTag: 1
+            classTag: 0
             // streamPath: null,
             // rectPath: 
         }
     },
     methods: {
+        setupBrush() {
+            let vm = this;
+
+            let height = this.elHeight;
+            let width = this.elWidth;
+            function brushed({ selection }) {
+                let scale = d3.scaleLinear([40, width - 10], [1, 366]);
+                vm.timeGap1 = vm.parseDayToDate(parseInt(scale(selection[0])));
+                vm.timeGap2 = vm.parseDayToDate(parseInt(scale(selection[1])))
+
+            }
+            function brushended({ selection }) {
+
+                const dataStore = useDataStore();
+
+                let scale = d3.scaleLinear([40, width - 10], [1, 366]);
+                dataStore.timeGap = [parseInt(scale(selection[0])), parseInt(scale(selection[1]))];
+            }
+            // height - 30, 10
+            const brush = d3.brushX()
+                .extent([[40, 0], [width - 15, 0.95 * this.elHeight]])
+                .on("brush", brushed)
+                .on("end", brushended);
+            d3.select('#brush_g').call(brush)
+                .call(brush.move, [40, width - 15]);
+        },
         // 日期是一年的哪一天
         parseDateToDay(time) {
             let month = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -151,7 +180,7 @@ export default {
                 // if (this.allData[d]['onsetdate'] != 'Asymptomatic' && this.allData[d]['onsetdate'] != 'Mid-March')
                 allOnsetdate.push({
                     date: data[d]['reportdate'],
-                    dcca_type: data[d]['Dcca_type'],
+                    dcca_type: data[d]['Deprivation_type'],
                     depre_type: data[d]['Deprivation_type']
                 });
             }
@@ -159,7 +188,7 @@ export default {
             // console.log('type', dptype)
             for (const da of allOnsetdate) {
                 let d = da.date;
-                let d_type = da.dcca_type;
+                let d_type = da.depre_type;
                 if (dptype != 1)
                     d_type = da.depre_type;
                 let date = (d.split('/'));
@@ -182,11 +211,11 @@ export default {
 
                     } else {
                         if (d_type[0] == 'H') {
-                            type_tag = 'high';
+                            type_tag = 'low';
                         } else if (d_type[0] == 'M') {
                             type_tag = 'mid';
                         } else {
-                            type_tag = 'low';
+                            type_tag = 'high';
                         }
                     }
                     // console.log(dIndex);
@@ -250,7 +279,7 @@ export default {
             let tScale = d3.scaleUtc([new Date('2020/01/01'), new Date('2020/12/31')], [40, this.elWidth - 10]);
             let timeXAxis = (g, x, height) => g
                 .attr("transform", `translate(0,${height - 0})`)
-                .call(d3.axisBottom(x).ticks(3).tickSizeOuter(0))
+                .call(d3.axisBottom(x).ticks(7).tickSizeOuter(0))
             d3.select('#ay').attr('id', 'timeAxis_g').call(timeXAxis, tScale, 0.95 * this.elHeight)
 
             let axisL = d3.axisLeft().scale(rrScale).ticks(4);
@@ -315,6 +344,7 @@ export default {
         this.streamPath = this.allPath.streamPath;
         const dataStore = useDataStore();
         const vm = this;
+        this.setupBrush();
         dataStore.$subscribe(() => {
             if (dataStore.classTag != vm.classTag) {
                 vm.classTag = dataStore.classTag;

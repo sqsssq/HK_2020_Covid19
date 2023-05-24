@@ -5,8 +5,8 @@
  * @LastEditTime: 2023-05-16 12:30:56
 -->
 <template>
-    <!-- <div id="navBar"></div> -->
-    <div style="height: calc(96vh - 0px); width: calc(100% - 0px);">
+    <div id="navBar">Does Where You are Matter? A Social Hierarchical Perspective into the COVID-19 Spreads in Hong Kong</div>
+    <div style="height: calc(96vh - 0px); width: calc(100% - 0px);  margin-top: calc(-4vh - 5px);">
         <div class="framework"
             
         style="position: absolute; left: 10px; top: calc(5px + 70vh + 15px - 10px); height: calc(30vh - 20px); width: calc(55vw - 20px)">
@@ -17,11 +17,11 @@
             <Map :allData="allData" />
         </div>
         <div class="framework"
-            style="position: absolute; left: calc(55vw + 10px); top: calc(10px + 70vh); height: calc(30vh - 20px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
+            style="position: absolute;  right: calc(10px); top: calc(10px + 70vh); height: calc(30vh - 20px); width: calc((100vw - 50vw - 20px - 20px) / 2);">
             <Info :allData="allData" />
         </div>
         <div class="framework"
-            style="position: absolute; right: calc(10px); top: calc(10px + 70vh); height: calc(30vh - 20px); width: calc((100vw - 50vw - 20px - 20px) / 2 - 5vw);">
+            style="position: absolute;left: calc(55vw + 10px); top: calc(10px + 70vh); height: calc(30vh - 20px); width: calc((100vw - 50vw - 20px - 20px) / 2 - 5vw);">
             <Matrix :allData="allData" :migrationData="migrationData" />
         </div>
         <div class="framework"
@@ -104,14 +104,14 @@ export default {
     margin-top: 7px;
     margin-left: 10px;
     height: 35px;
-
-    font-weight: bold;
     font-size: 20px;
     color: white;
     padding-left: 10px;
     padding-right: 10px;
-    font-family: STHeiti;
+    /* font-family: STHeiti; */
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
     line-height: 35px;
+    font-weight: bold;
 }
 
 #navBar {
@@ -123,8 +123,8 @@ export default {
     font-weight: bold;
     color: white;
     font-size: 30px;
-    height: calc(6%);
-    padding-top: 1%;
+    height: calc(4% + 5px);
+    padding-top: 10px;
     /* font-family: STHeiti; */
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }

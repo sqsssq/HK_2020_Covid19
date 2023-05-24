@@ -109,7 +109,8 @@
             </div> -->
             <div style="height: 10%;">
                 <div style="height: 30px;">
-                    SOCIETY LEVEL
+                    <!-- SOCIETY LEVEL -->
+                    Neighborhood Deprivation Index 
                 </div>
                 <div style="padding-top: 5px;">
                     <svg height="30" width="100%">
@@ -124,7 +125,7 @@
             </div>
             <div style="height: 10%;">
                 <div>
-                    AREA LEVEL
+                    Analysis Level
                 </div>
                 <div style="padding-top: 5px; width: 100%;">
                     <el-select v-model="value" class="m-2" placeholder="Select" size="large" style="width: calc(100% - 10px);">
@@ -135,7 +136,7 @@
 
             <div style="height: 10%;">
                 <div>
-                    RELATED CASES No.
+                    Related Cases No.
                 </div>
                 <div style="padding-top: 5px; width: 100%;">
     
@@ -146,7 +147,7 @@
                 </div>
             </div>
             <!-- <hr style="margin-bottom: 10px;"> -->
-            <div style="height: 20%;">
+            <!-- <div style="height: 20%;">
                 <div style="height: 30px;">
                     TIME PERIOD
                 </div>
@@ -155,42 +156,51 @@
                         <g id="brush_g"></g>
                     </svg>
                 </div>
-                <!-- <hr> -->
-            </div>
-            <div style="height: 10%;">
-                <div>
-                    BETWEENNESS CENTRALITY
+            </div> -->
+            <div style="height: 30%;">
+                <div style="height: 30px;">
+                    Betweenness Centrality
                 </div>
                 <div style="padding-top: 5px; width: 100%;">
                     <el-select v-model="bcValue" class="m-2" placeholder="Select" size="large" style="width: calc(100% - 10px);">
                         <el-option v-for="item in bcOptions" :key="item.value" :label="item.label" :value="item.value" class="selectOptionCls" />
                     </el-select>
                 </div>
+
+                <div style="height: calc(100% - 95px); overflow-y: auto;" ref="degreeDiv">
+                    <svg height="500" width="100%" id="degreeSvg">
+                        <g v-for="(item, i) in betweenData" :key="i" :transform="translate(0, 30 * (i + 1))">
+                            <text>{{ item.CASENO }}</text>
+                            <rect x="60" y="-15" :width="item['len_between_center']" height="20" fill="#bbb"></rect>
+                            <text x="70">{{ item['between_center'].substr(1, item['between_center'].length - 10) }}</text>
+                        </g>
+                    </svg>
+                </div>
             </div>
 
             <div style="height: 20%;">
                 <div style="height: 30px;">
-                    DEGREE CENTRALITY
+                    Degree Centrality
                 </div>
                 <div style="height: calc(100% - 35px); overflow-y: auto;" ref="degreeDiv">
                     <svg height="500" width="100%" id="degreeSvg">
                         <g v-for="(item, i) in degreeData" :key="i" :transform="translate(0, 30 * (i + 1))">
                             <text>{{ item.CASENO }}</text>
-                            <rect x="60" y="-15" :width="item.len" height="20" fill="#bbb"></rect>
-                            <text x="70">{{ item['degree_center'].substr(1, item['degree_center'].length - 5) }}</text>
+                            <rect x="60" y="-15" :width="item['len_degree_center']" height="20" fill="#bbb"></rect>
+                            <text x="70">{{ item['degree_center'].substr(1, item['degree_center'].length - 10) }}</text>
                         </g>
                     </svg>
                 </div>
             </div>
             <div style="height: 20%; margin-top:10px;">
                 <div style="height: 30px;">
-                    OUT DEGREE
+                    Out Degree
                 </div>
                 <div style="height: calc(100% - 35px); overflow-y: auto;" ref="degreeDiv">
                     <svg height="500" width="100%" id="degreeSvg">
-                        <g v-for="(item, i) in degreeData" :key="i" :transform="translate(0, 30 * (i + 1))">
+                        <g v-for="(item, i) in outData" :key="i" :transform="translate(0, 30 * (i + 1))">
                             <text>{{ item.CASENO }}</text>
-                            <rect x="60" y="-15" :width="item.len" height="20" fill="#bbb"></rect>
+                            <rect x="60" y="-15" :width="item['len_out_degree']" height="20" fill="#bbb"></rect>
                             <text x="70">{{ item['out_degree'] }}</text>
                         </g>
                     </svg>
@@ -218,6 +228,7 @@ export default {
             class_color: ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'],
             degreeData: [],
             outData: [],
+            betweenData: [],
             bcValue: 0,
             bcOptions: [{
                 value: 0,
@@ -235,7 +246,7 @@ export default {
                 },
                 {
                     value: 2,
-                    label: 'DCCA Level',
+                    label: 'Neighborhood Level',
                 },
                 {
                     value: 3,
@@ -251,11 +262,13 @@ export default {
 
     mounted() {
         // console.log(this.allData)
-        this.calcTimePeriod(this.allData);
+        // this.calcTimePeriod(this.allData);
         this.degreeData = this.calcDegree(outDegree, 'degree_center');
-        this.outData = this.calcDegree(outDegree, 'out_degree')
+        this.outData = this.calcDegree(outDegree, 'out_degree');
+        console.log(this.outData)
+        this.betweenData = this.calcDegree(outDegree, 'between_center');
 
-        // console.log(this.degreeData)
+        console.log(this.betweenData)
     },
 
     watch: {
@@ -386,12 +399,12 @@ export default {
             let xScale = scaleLinear([0, parseFloat(sData[0][type_name])], [0, width - 105]);
             let resData = [];
             for (let i in sData) {
-                sData[i]['len'] = xScale(parseFloat(sData[i][type_name]));
+                sData[i]['len_' + type_name] = xScale(parseFloat(sData[i][type_name]));
                 if (resData.length <= 100) {
                     resData.push(sData[i]);
                 }
             }
-            return sData;
+            return resData;
         }
     }
 }

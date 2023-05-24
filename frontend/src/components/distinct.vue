@@ -42,12 +42,11 @@
                             <path v-for="(t, i) in links" :key="'link' + i"   :id="'con' + i" :d="linkArc(t)" fill="none" marker-end="url(#arrow)"
                                 :opacity="1 == 1 ? t['stroke-width'] : isShow[t.sr] && isShow[t.tr]" stroke="rgb(99, 99, 99)" :stroke-width="3" >
                             </path>
-                            <!-- :x="(t['source'].nx + t['target'].nx) / 2" :y="(t['source'].ny + t['target'].ny) / 2" -->
-                            <text v-for="(t, i) in links" :key="'link' + i"  :opacity="t['stroke-width']" >
+                            <!-- <text v-for="(t, i) in links" :key="'link' + i"  :opacity="t['stroke-width']" >
                                 <textPath :href="'#con' + i" :text-anchor="'middle'" startOffset="50%" font-size="15" dy="-0.5">
                                 {{t.sum}}
                             </textPath>
-                            </text>
+                            </text> -->
                         </g>
                             <!-- <path v-for="(t, i) in links" :key="'link' + i" :d="linkArc(t)" fill="none"   marker-start="url(#arrowB)"
                                 :opacity="1 == 1 ? (i == 0 ? 1 : 1) : isShow[t.sr] && isShow[t.tr]" stroke="rgba(99, 99, 99, 0)" :stroke-width="3">
@@ -91,7 +90,7 @@ export default {
             links: [],
             edges: [],
             value: [0, 10],
-            class_color: ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'],
+            class_color: ['rgba(217,83,79,1)', 'rgb(244, 189, 80)', 'rgb(83, 167, 145)'],
             maxV: 1,
             minV: 0,
             isShow: {},
@@ -667,7 +666,8 @@ export default {
                 links[i]['target']['nx'] = xScale(links[i]['target']['x']);
                 links[i]['target']['ny'] = yScale(links[i]['target']['y']);
                 // console.log(links[i], links[i].target)
-                links[i]['stroke-width'] = links[i]['target'].id != 'Yau Tsim Mong' ? 0 : link_scale(links[i]['sum']);
+                links[i]['stroke-width'] = link_scale(links[i]['sum']);
+                // links[i]['stroke-width'] = links[i]['target'].id != 'Yau Tsim Mong' ? 0 : link_scale(links[i]['sum']);
             }
             // console.log(links, tmp_links, nodes)
             // console.log(links, nodes);
@@ -691,7 +691,7 @@ export default {
 
         const dataStore = useDataStore();
 
-        // [this.nodes, this.links] = this.drawDistinct()
+        [this.nodes, this.links] = this.drawDistinct()
         this.timeGap = dataStore.timeGap;
         let netData = this.calcNet(this.allData, 1, dataStore.timeGap);
         for (const d of netData.nodes) {
@@ -702,7 +702,7 @@ export default {
         this.relateNum = [1, maxV]
         this.maxV = maxV;
         // // [this.nodes, this.links] = this.drawNetwork(netData);
-        [this.nodes, this.links] = this.drawNet(netData);
+        // [this.nodes, this.links] = this.drawNet(netData);
 
 
         const vm = this;

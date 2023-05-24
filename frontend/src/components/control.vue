@@ -107,7 +107,7 @@
                     12000
                 </div>
             </div> -->
-            <!-- <div style="height: 10%;">
+            <div style="height: 10%;">
                 <div style="height: 30px;">
                     SOCIETY LEVEL
                 </div>
@@ -121,7 +121,7 @@
                                 <text x="235" y="21">High</text>
                             </svg>
                 </div>
-            </div> -->
+            </div>
             <div style="height: 10%;">
                 <div>
                     AREA LEVEL
@@ -152,21 +152,46 @@
                 </div>
                 <div style="height: calc(100% - 30px);" ref="timePeriodDiv">
                     <svg height="100%" width="100%" id="timePeriodSvg">
-
+                        <g id="brush_g"></g>
                     </svg>
                 </div>
                 <!-- <hr> -->
             </div>
+            <div style="height: 10%;">
+                <div>
+                    BETWEENNESS CENTRALITY
+                </div>
+                <div style="padding-top: 5px; width: 100%;">
+                    <el-select v-model="bcValue" class="m-2" placeholder="Select" size="large" style="width: calc(100% - 10px);">
+                        <el-option v-for="item in bcOptions" :key="item.value" :label="item.label" :value="item.value" class="selectOptionCls" />
+                    </el-select>
+                </div>
+            </div>
+
             <div style="height: 20%;">
                 <div style="height: 30px;">
                     DEGREE CENTRALITY
                 </div>
-                <div style="height: calc(100% - 30px); overflow-y: auto;" ref="degreeDiv">
+                <div style="height: calc(100% - 35px); overflow-y: auto;" ref="degreeDiv">
                     <svg height="500" width="100%" id="degreeSvg">
                         <g v-for="(item, i) in degreeData" :key="i" :transform="translate(0, 30 * (i + 1))">
                             <text>{{ item.CASENO }}</text>
                             <rect x="60" y="-15" :width="item.len" height="20" fill="#bbb"></rect>
-                            <text x="70">{{ item.degree_center.substr(1, item.degree_center.length - 5) }}</text>
+                            <text x="70">{{ item['degree_center'].substr(1, item['degree_center'].length - 5) }}</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div style="height: 20%; margin-top:10px;">
+                <div style="height: 30px;">
+                    OUT DEGREE
+                </div>
+                <div style="height: calc(100% - 35px); overflow-y: auto;" ref="degreeDiv">
+                    <svg height="500" width="100%" id="degreeSvg">
+                        <g v-for="(item, i) in degreeData" :key="i" :transform="translate(0, 30 * (i + 1))">
+                            <text>{{ item.CASENO }}</text>
+                            <rect x="60" y="-15" :width="item.len" height="20" fill="#bbb"></rect>
+                            <text x="70">{{ item['out_degree'] }}</text>
                         </g>
                     </svg>
                 </div>
@@ -178,7 +203,7 @@
 
 <script>
 import outDegree from '../assets/case_stat.csv';
-
+import { brushX } from 'd3';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { scaleLinear, scaleUtc } from 'd3-scale';
 import { select } from 'd3-selection';
@@ -192,6 +217,18 @@ export default {
             caseValue: 0,
             class_color: ['rgb(83, 167, 145)', 'rgb(244, 189, 80)', 'rgba(217,83,79,1)'],
             degreeData: [],
+            outData: [],
+            bcValue: 0,
+            bcOptions: [{
+                value: 0,
+                label: 'All',
+            }, {
+                value: 1,
+                label: '>0',
+            }, {
+                value: 2,
+                label: '= 0',
+            }],
             options: [{
                     value: 1,
                     label: 'Case Level',
@@ -215,7 +252,9 @@ export default {
     mounted() {
         // console.log(this.allData)
         this.calcTimePeriod(this.allData);
-        this.degreeData = this.calcDegree(outDegree)
+        this.degreeData = this.calcDegree(outDegree, 'degree_center');
+        this.outData = this.calcDegree(outDegree, 'out_degree')
+
         // console.log(this.degreeData)
     },
 
@@ -227,6 +266,51 @@ export default {
     },
 
     methods: {
+
+        parseDayToDate(day) {
+            let month = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let sumMonth = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+            let monthName = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+
+            let y = '2020';
+            let m = '';
+            let d = '';
+            for (let i = 0; i < 12; ++i) {
+                if (day >= sumMonth[i] && day <= sumMonth[i + 1]) {
+                    m = monthName[i];
+                    d = day - sumMonth[i];
+                }
+            }
+            if (d < 10)
+                d = '0' + d.toString();
+            return y + '/' + m + '/' + d;
+        },
+        setupBrush() {
+            let vm = this;
+
+            let height = this.$refs.timePeriodDiv.offsetHeight;
+            let width = this.$refs.timePeriodDiv.offsetWidth;
+            function brushed({ selection }) {
+                let scale = scaleLinear([30, width - 10], [1, 366]);
+                // vm.timeGap1 = vm.parseDayToDate(parseInt(scale(selection[0])));
+                // vm.timeGap2 = vm.parseDayToDate(parseInt(scale(selection[1])))
+
+            }
+            function brushended({ selection }) {
+
+                const dataStore = useDataStore();
+
+                let scale = scaleLinear([30, width - 10], [1, 366]);
+                dataStore.timeGap = [parseInt(scale(selection[0])), parseInt(scale(selection[1]))];
+            }
+            // height - 30, 10
+            const brush = brushX()
+                .extent([[30, 10], [width - 10, height - 30]])
+                .on("brush", brushed)
+                .on("end", brushended);
+            select('#brush_g').call(brush)
+                .call(brush.move, [30, width - 10]);
+        },
         translate (x, y) {
             return `translate(${x}, ${y})`;
         },
@@ -274,8 +358,9 @@ export default {
             //     // console.log(i);
             //     res_data.push()
             // }
+            this.setupBrush();
         },
-        calcDegree(data) {
+        calcDegree(data, type_name) {
             let bData = []
             let sData = []
             let oData = [];
@@ -285,23 +370,23 @@ export default {
                 oData.push(data[i]);
             }
             sData.sort((a, b) => {
-                return parseFloat(b.degree_center) - parseFloat(a.degree_center);
+                return parseFloat(b[type_name]) - parseFloat(a[type_name]);
             })
             bData.sort((a, b) => {
-                return parseFloat(b.degree_center) - parseFloat(a.degree_center);
+                return parseFloat(b[type_name]) - parseFloat(a[type_name]);
             })
             oData.sort((a, b) => {
-                return parseFloat(b.degree_center) - parseFloat(a.degree_center);
+                return parseFloat(b[type_name]) - parseFloat(a[type_name]);
             })
             
-            console.log(sData, bData, oData);
+            // console.log(sData, bData, oData);
             
             let height = this.$refs.degreeDiv.offsetHeight;
             let width = this.$refs.degreeDiv.offsetWidth;
-            let xScale = scaleLinear([0, parseFloat(sData[0].degree_center)], [0, width - 105]);
+            let xScale = scaleLinear([0, parseFloat(sData[0][type_name])], [0, width - 105]);
             let resData = [];
             for (let i in sData) {
-                sData[i]['len'] = xScale(parseFloat(sData[i].degree_center));
+                sData[i]['len'] = xScale(parseFloat(sData[i][type_name]));
                 if (resData.length <= 100) {
                     resData.push(sData[i]);
                 }

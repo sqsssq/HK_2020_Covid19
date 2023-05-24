@@ -6,7 +6,7 @@
 -->
 <template>
     <div class="frameworkTitle">
-        <div class="title">Case Information</div>
+        <div class="title">Wordclod View</div>
     </div>
     <div class="frameworkBody">
         <div ref="info" style="height: 100%; width: 100%; font-size: 18px;">

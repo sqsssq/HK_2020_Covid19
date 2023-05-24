@@ -7,7 +7,7 @@
 <template>
     <!-- <div> -->
     <div class="frameworkTitle">
-        <div class="title">Case Time Variation</div>
+        <div class="title">Temporal View</div>
     </div>
     <div class="frameworkBody">
         <div ref="stream" style="width: 100%; height: 100%">
@@ -20,18 +20,21 @@
                     <g id="ax" transform="translate(40, 15)" style="font-size: 18px;">
 
                     </g>
+                    <g id="ay" transform="translate(0, 15)" style="font-size: 18px;">
+
+</g>
                     <rect v-for="(t, i) in allPath.rectPath" :key="'rect' + i" :x="t.x" :y="t.y" :height="t.h"
                         :width="t.w" :fill="t.color"></rect>
 
                 </g>
-                <path :d="'M 40 0 L ' + elWidth + ' 0'" fill="none" stroke="black"
-                    :transform="translate(0, 0.95 * elHeight - 14)"></path>
+                <!-- <path :d="'M 40 0 L ' + elWidth + ' 0'" fill="none" stroke="black"
+                    :transform="translate(0, 0.95 * elHeight - 14)"></path> -->
 
-                <g :transform="translate(0, (elWidth - 40) / 53)" v-for="(t, i) in monthTag" :key="'mts' + i">
+                <!-- <g :transform="translate(0, (elWidth - 40) / 53)" v-for="(t, i) in monthTag" :key="'mts' + i">
                     <text :x="t.px" dx="-7" :y="elHeight * 0.75 + 22" font-size="18" color="black">{{ t.st }}</text>
                     <path :d="'M 0 0 L 0 7'" :transform="translate(t.px, elHeight * 0.75 - 1)" fill="none"
                         stroke="black"></path>
-                </g>
+                </g> -->
             </svg>
         </div>
     </div>
@@ -220,11 +223,11 @@ export default {
             }
             // console.log(min_y, max_y);
             const yScale = d3.scaleLinear([min_y, max_y], [0.95 * this.elHeight - 10, 0]);
-            const xScale = d3.scaleLinear([0, 366], [40, this.elWidth]);
+            const xScale = d3.scaleLinear([0, 366], [40, this.elWidth - 15]);
             const rScale = d3.scaleLinear([min_v, max_v], [0, 0.95 * this.elHeight - 15]);
             const rrScale = d3.scaleLinear([min_v, max_v], [0.95 * this.elHeight - 15, 0]);
             // console.log(yScale(0));
-            const xDScale = d3.scaleLinear([0, 365], [40, this.elWidth]);
+            const xDScale = d3.scaleLinear([0, 365], [40, this.elWidth - 30]);
 
             // let sumMonth = 0;
             for (let i = 0; i < 12; ++i) {
@@ -243,6 +246,12 @@ export default {
                 // sumMonth += this.month[i];
                 // console.log(sumMonth);
             }
+
+            let tScale = d3.scaleUtc([new Date('2020/01/01'), new Date('2020/12/31')], [40, this.elWidth - 10]);
+            let timeXAxis = (g, x, height) => g
+                .attr("transform", `translate(0,${height - 0})`)
+                .call(d3.axisBottom(x).ticks(3).tickSizeOuter(0))
+            d3.select('#ay').attr('id', 'timeAxis_g').call(timeXAxis, tScale, 0.95 * this.elHeight)
 
             let axisL = d3.axisLeft().scale(rrScale).ticks(4);
             d3.select('#ax').call(axisL)

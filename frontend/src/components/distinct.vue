@@ -6,7 +6,7 @@
 -->
 <template>
     <div class="frameworkTitle">
-        <div class="title">Network View</div>
+        <div class="title">Case Related Network</div>
         <!-- <div class="slider-demo-block" style="width: 300px; float: right; margin-top: 7px; margin-right: 30px;">
                     <el-slider v-model="value" range :min="minV" :max="maxV" />
                 </div> -->
@@ -35,39 +35,40 @@
                         <g id="zoom_g">
                             <marker id="arrow" viewBox="0 -5 10 10" refX="20" refY="-0.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                         <path d="M0,-5L10,0L0,5" fill="rgb(99, 99, 99)" stroke="none" stroke-width="1" opacity="1"/>
+                    </marker><marker id="arrowB" viewBox="0 -5 10 10" refX="40" refY="-0.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M0,-5L10,0L0,5" fill="blue"/>
                     </marker>
                     <g>
-                        <!-- marker-end="url(#arrow)" -->
-                            <path v-for="(t, i) in links" :key="'link' + i"   :id="'con' + i" :d="linkArc(t)" fill="none" 
-                                :opacity="isShow[t.sr] && isShow[t.tr]" stroke="rgb(99, 99, 99)" :stroke-width="0.5" >
+                            <path v-for="(t, i) in links" :key="'link' + i"   :id="'con' + i" :d="linkArc(t)" fill="none" marker-end="url(#arrow)"
+                                :opacity="1 == 1 ? t['stroke-width'] : isShow[t.sr] && isShow[t.tr]" stroke="rgb(99, 99, 99)" :stroke-width="3" >
                             </path>
                             <!-- :x="(t['source'].nx + t['target'].nx) / 2" :y="(t['source'].ny + t['target'].ny) / 2" -->
-                            <!-- <text v-for="(t, i) in links" :key="'link' + i"  :opacity="t['stroke-width']" >
+                            <text v-for="(t, i) in links" :key="'link' + i"  :opacity="t['stroke-width']" >
                                 <textPath :href="'#con' + i" :text-anchor="'middle'" startOffset="50%" font-size="15" dy="-0.5">
                                 {{t.sum}}
                             </textPath>
-                            </text> -->
+                            </text>
                         </g>
                             <!-- <path v-for="(t, i) in links" :key="'link' + i" :d="linkArc(t)" fill="none"   marker-start="url(#arrowB)"
                                 :opacity="1 == 1 ? (i == 0 ? 1 : 1) : isShow[t.sr] && isShow[t.tr]" stroke="rgba(99, 99, 99, 0)" :stroke-width="3">
                             </path> -->
-                            <!-- <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="20"
+                            <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="20"
                                 :fill="'white'" :stroke="t.t_color" stroke-width="2"
                                 :opacity="1 == 1 ? 1 : isShow[t.id]" @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"
                                 @click="clickNode(t.id, t.rcase)">
-                            </circle> -->
+                            </circle>
 
                             <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="t.nr"
-                                :fill="t.t_color" :stroke="'rgb(99,99,99)'" stroke-width="0.5"
-                                :opacity="isShow[t.id]" @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"
+                                :fill="t.t_color" :stroke="t.t_color" stroke-width="0"
+                                :opacity="1 == 1 ? 1 : isShow[t.id]" @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"
                                 @click="clickNode(t.id, t.rcase)">
                             </circle>
         
-                            <g v-show="isClick == 1">
-                                <text v-for="(t, i) in nodes" :key="'tnd' + i" :x="t.nx" :y="t.ny" :opacity="isShow[t.id]" font-size="18">
+                            <!-- <g v-show="isClick == 1"> -->
+                                <text v-for="(t, i) in nodes" :key="'tnd' + i" :x="t.nx" :y="t.ny" :opacity="1 == 1 ? 1 : isShow[t.id]" font-size="18">
                                     {{ t.id }}
                                 </text>
-                            </g>
+                            <!-- </g> -->
                         </g>
                     </svg>
         </div>

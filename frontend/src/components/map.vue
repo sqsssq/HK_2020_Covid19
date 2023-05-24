@@ -7,7 +7,7 @@
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
     <div class="frameworkTitle">
-        <div class="title">Cases Distribution Map</div>
+        <div class="title">Map View</div>
     </div>
     <div class="frameworkBody">
         <div id="mapCase" ref="map" style="height: 100%; width: 100%; margin: 0px 0 0 0px;">

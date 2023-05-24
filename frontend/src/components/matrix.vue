@@ -6,15 +6,15 @@
 -->
 <template>
     <div class="frameworkTitle">
-        <div class="title">Districts Visting Matrix</div>
-        <div style="float: right; margin-top: 7px; margin-right: 10px; font-size: 18px;">
+        <div class="title">Statistic View</div>
+        <!-- <div style="float: right; margin-top: 7px; margin-right: 10px; font-size: 18px;">
             <svg height="30px" width="400px">
                 <rect v-for="(t, i) in legendRect" :key="'lr' + i" :x="200 + i * (150 / legendRect.length)" y="10" height="20" :width="(150 / legendRect.length)" :fill="t" :stroke="t"></rect>
                 <text y="25" x="180">0</text>
                 <text y="25" x="355">{{ maxVM }}</text>
                 <text y="25" x="70">{{ 'Visting Case:' }}</text>
             </svg>
-        </div>
+        </div> -->
     </div>
     <div class="frameworkBody">
         <div ref="matrix" style="height: 100%; width: 100%;">

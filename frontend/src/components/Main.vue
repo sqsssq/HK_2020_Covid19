@@ -2,10 +2,10 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-20 23:25:35
- * @LastEditTime: 2023-05-16 12:30:56
+ * @LastEditTime: 2023-05-25 18:04:26
 -->
 <template>
-    <div id="navBar">Does Where You are Matter? A Social Hierarchical Perspective into the COVID-19 Spreads in Hong Kong</div>
+    <div id="navBar">Does Where You Go Matter?: A Visual Analytics System for COVID-19 Transmission based on Social Hierarchical Perspective</div>
     <div style="height: calc(96vh - 0px); width: calc(100% - 0px);  margin-top: calc(-4vh - 5px);">
         <div class="framework"
             

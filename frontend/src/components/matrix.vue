@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-12-14 16:37:02
- * @LastEditTime: 2022-12-16 17:32:14
+ * @LastEditTime: 2023-05-25 13:06:42
 -->
 <template>
     <div class="frameworkTitle">
@@ -38,7 +38,7 @@
                         :y="20 + i * (elHeight - 55) / (18)">{{ t }}</text>
                 </g> -->
                 <g v-for="(t, i) in caseSet" :key="'alp' + i" :transform="translate(30, 0, 0)">
-                    <path :d="t.d"  stroke="steelblue" fill="none" stroke-width="0.5" :opacity="selectionNode[t.id] == 1 ? 1 : 0"></path>
+                    <path :d="t.d"  :stroke="selectionNode[t.id] == 2 ? 'orange' :'steelblue'" fill="none" :stroke-width="selectionNode[t.id] == 2 ? 2 : 0.5" :opacity="selectionNode[t.id] == 2 ? 1 : selectionNode[t.id] == 1 ? 0.8 : 0"></path>
                 </g>
                 <g v-for="(t, i) in axis" :key="'a' + i" :transform="translate(30 + i * (elWidth - 90) / 3, 0, 0)">
                     <path :d="'M 0 55 L 0 ' + (elHeight - 10)" stroke="black" fill="none" stroke-width="1"></path>
@@ -75,7 +75,7 @@ export default {
             legendRect: [],
             maxVM: 0,
             selectionNode: [],
-            axis: ['Gender', 'Age', 'Related', 'NDI'],
+            axis: ['Gender', 'Age', 'Related Case', 'NDI'],
             tag: [['F', 'M'], ['100', '75', '50', '25', '0'], ['36', '24', '12', '0'], ['High', 'Mid', 'Low']],
             caseSet: [],
             color_map: ['rgb(235, 237, 240)', 'rgb(234, 193, 166)', 'rgb(221, 115, 109)', 'rgb(179, 92, 81)', 'rgb(115, 68, 50)'],

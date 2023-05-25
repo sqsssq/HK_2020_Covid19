@@ -2,7 +2,7 @@
     * @Description: 
     * @Author: Qing Shi
     * @Date: 2022-11-26 12:24:17
-    * @LastEditTime: 2023-05-23 22:16:58
+ * @LastEditTime: 2023-05-25 13:18:20
    -->
    <template>
     <div class="frameworkTitle">
@@ -58,13 +58,13 @@
                             </circle> -->
 
                             <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="t.nr"
-                                :fill="t.t_color" :stroke="'rgb(99,99,99)'" stroke-width="0.5"
+                                :fill="t.t_color" :stroke="t.id == 904 ? 'black' : 'rgb(99,99,99)'" :stroke-width="t.id == 904 ? 2 : 0.5"
                                 :opacity="isShow[t.id]" @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"
                                 @click="clickNode(t.id, t.rcase)">
                             </circle>
         
                             <g v-show="isClick == 1">
-                                <text v-for="(t, i) in nodes" :key="'tnd' + i" :x="t.nx" :y="t.ny" :opacity="isShow[t.id]" font-size="18">
+                                <text v-for="(t, i) in nodes" :key="'tnd' + i" :x="t.nx+ 10" :y="t.ny + 2" :opacity="isShow[t.id]" font-size="14">
                                     {{ t.id }}
                                 </text>
                             </g>
@@ -173,7 +173,7 @@ export default {
             }
             let snode = {};
             this.isShow[sid] = 1;
-            snode[parseInt(sid)] = 1;
+            snode[parseInt(sid)] = 2;
             for (let i of rid) {
                 if (parseInt(i) == 0)
                     break;

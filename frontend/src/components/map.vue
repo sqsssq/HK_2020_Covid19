@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 05:07:07
- * @LastEditTime: 2023-05-19 15:28:20
+ * @LastEditTime: 2023-05-25 13:03:24
 -->
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
@@ -19,8 +19,8 @@
                             </g> -->
                             <g v-show="area_lev == 1">
                                 <circle v-for="(c, i) in case_data" :key="'c' + i" :id="'c' + i" :cx="c.x" :cy="c.y" :fill="classTag == 1 ? c.t_color : c.d_color"
-                                    fill-opacity="0.8" :r="c.id == 'bar' ? 20 : 4" stroke="rgb(99, 99, 99)" stroke-width="0.5"
-                                    :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
+                                    fill-opacity="0.8" :r="selectionNode[c.id] == 2 ? 15 : c.id == 'bar' ? 20 : 10" :stroke="selectionNode[c.id] == 2 ? 'black' :'rgb(99, 99, 99)'" :stroke-width="selectionNode[c.id] == 2 ? 3: 0.5"
+                                    :opacity="(((c.id == 'bar') || (selectionNode[c.id] == 1 || selectionNode[c.id] == 2) && (c.reportTime >= timeGap[0] && c.reportTime <= timeGap[1]))) ? 1 : 0" :time="c.reportTime">
                                 </circle>
                             </g>
                             <g v-show="area_lev != 1">
@@ -80,7 +80,7 @@ export default {
 
             //         lat: parseFloat(22.262691),
             //         lon: parseFloat(114.131692),
-    //         let marker = L.marker([22.262691, 114.131692]).addTo(map)
+            let marker = L.marker([22.348012897, 114.201013778]).addTo(map)
     // .bindPopup('<div style="font-size:18px;text-align:center;">All Night Long<br>(bar)</div>')
     // .openPopup();
 

@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-11-26 05:07:07
- * @LastEditTime: 2023-05-25 13:03:24
+ * @LastEditTime: 2023-05-26 11:40:01
 -->
 <template>
     <!-- <div style="height: 100%; width: 100%;"> -->
@@ -80,7 +80,8 @@ export default {
 
             //         lat: parseFloat(22.262691),
             //         lon: parseFloat(114.131692),
-            let marker = L.marker([22.348012897, 114.201013778]).addTo(map)
+            let marker = L.marker([22.262691, 114.131692]).addTo(map)
+            // let marker = L.marker([22.348012897, 114.201013778]).addTo(map)
     // .bindPopup('<div style="font-size:18px;text-align:center;">All Night Long<br>(bar)</div>')
     // .openPopup();
 
@@ -107,11 +108,11 @@ export default {
                 //     t_color = 'rgb(83, 167, 145)';
                 // }
                 if (d['Deprivation_type'][0] == 'H') {
-                    t_color = 'rgb(83, 167, 145)';
+                    t_color = 'rgba(217,83,79,1)';
                 } else if (d['Deprivation_type'][0] == 'M') {
                     t_color = 'rgb(244, 189, 80)';
                 } else {
-                    t_color = 'rgba(217,83,79,1)';
+                    t_color = 'rgb(83, 167, 145)';
                 }
                 c_data.push({
                     x: _loc.x,

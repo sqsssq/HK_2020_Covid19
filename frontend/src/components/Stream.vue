@@ -2,7 +2,7 @@
  * @Description: 
  * @Author: Qing Shi
  * @Date: 2022-12-13 02:18:26
- * @LastEditTime: 2023-05-10 15:16:52
+ * @LastEditTime: 2023-05-26 10:49:12
 -->
 <template>
     <!-- <div> -->
@@ -202,20 +202,20 @@ export default {
                     let type_tag = "";
                     if (dptype != 1) {
                         if (d_type[0] == 'H') {
-                            type_tag = 'low';
+                            type_tag = 'high';
                         } else if (d_type[0] == 'M') {
                             type_tag = 'mid';
                         } else {
-                            type_tag = 'high';
+                            type_tag = 'low';
                         }
 
                     } else {
                         if (d_type[0] == 'H') {
-                            type_tag = 'low';
+                            type_tag = 'high';
                         } else if (d_type[0] == 'M') {
                             type_tag = 'mid';
                         } else {
-                            type_tag = 'high';
+                            type_tag = 'low';
                         }
                     }
                     // console.log(dIndex);
@@ -296,6 +296,7 @@ export default {
                 let namespace = ["low", "mid", "high"];
                 let poscnt = 0.95 * this.elHeight;
                 for (const j of namespace) {
+                    // if (j == "high") {
                     let h = rScale(data[i][j]);
                     rectPath.push({
                         x: xScale(i),
@@ -305,6 +306,7 @@ export default {
                         w: this.elWidth / (series[0].length)
                     });
                     poscnt -= h;
+                // }
                 }
             }
             for (let i in series) {

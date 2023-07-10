@@ -2,7 +2,7 @@
     * @Description: 
     * @Author: Qing Shi
     * @Date: 2022-11-26 12:24:17
- * @LastEditTime: 2023-05-26 11:32:29
+ * @LastEditTime: 2023-07-10 21:15:55
    -->
    <template>
     <div class="frameworkTitle">
@@ -58,7 +58,7 @@
                             </circle> -->
 
                             <circle v-for="(t, i) in nodes" :key="'node' + i" :cx="t.nx" :cy="t.ny" :r="t.id == 2130 ? t.nr : t.nr"
-                                :fill="t.t_color" :stroke="t.id == 2130 ? 'black' : 'rgb(99,99,99)'" :stroke-width="t.id == 2130 ? 2 : 0.5"
+                                :fill="t.t_color" :stroke="t.id == 2130 ? 'rgb(99,99,99)' : 'rgb(99,99,99)'" :stroke-width="t.id == 2130 ? 0.5 : 0.5"
                                 :opacity="isShow[t.id]" @mouseenter="selectNode(t.id, t.rcase)" @mouseout="removeSelect()"
                                 @click="clickNode(t.id, t.rcase)">
                             </circle>
